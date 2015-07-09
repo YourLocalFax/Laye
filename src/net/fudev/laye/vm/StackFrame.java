@@ -36,8 +36,8 @@ public class StackFrame
    final int localCount;
    final int maxStackCount;
    
-   private final LayeValue[] stack;
-   private final LayeValue[] locals;
+   final LayeValue[] stack;
+   final LayeValue[] locals;
    
    int insnPtr = 0;
    private int stackPtr = 0;
@@ -53,6 +53,12 @@ public class StackFrame
       this.maxStackCount = closure.prototype.maxStackCount;
       this.locals = new LayeValue[localCount];
       this.stack = new LayeValue[maxStackCount];
+   }
+   
+   // TODO do we need this?
+   StackFrame copy(StackFrame parent)
+   {
+      return new StackFrame(parent, closure, self);
    }
    
    void store(int index, LayeValue value)
@@ -84,13 +90,8 @@ public class StackFrame
       return stack[idx];
    }
 
-   LayeValue last()
+   LayeValue peek()
    {
       return stack[stackPtr - 1];
-   }
-   
-   StackFrame duplicate(StackFrame parent)
-   {
-      return new StackFrame(parent, closure, self);
    }
 }

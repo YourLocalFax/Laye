@@ -95,9 +95,9 @@ class CallStack
       return top.get(idx);
    }
 
-   public LayeValue last()
+   public LayeValue peek()
    {
-      return top.last();
+      return top.peek();
    }
    
    public void unwind(int frames)

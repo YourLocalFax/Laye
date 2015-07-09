@@ -21,47 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package net.fudev.laye.vm;
 
-package net.fudev.laye.codegen;
-
-import java.util.Vector;
-
-import net.fudev.laye.debug.Console;
-import net.fudev.laye.parse.ast.Ast;
-import net.fudev.laye.struct.Identifier;
-import net.fudev.laye.sym.Symbol;
-import net.fudev.laye.sym.SymbolTable;
+import net.fudev.laye.type.LayeValue;
 
 /**
  * @author Sekai Kyoretsuna
  */
-public class LayeCompiler
+public class UpValue
 {
-   private final Console console;
-   private final SymbolTable symbolTable;
-   private final FunctionCompiler fnCompiler;
+   private LayeValue[] locals;
+   private int index;
    
-   public LayeCompiler(Console console)
+   public UpValue(StackFrame container, int index)
    {
-      this.console = console;
-      symbolTable = new SymbolTable();
-      fnCompiler = new FunctionCompiler(this.console, symbolTable, new FunctionPrototypeBuilder());
+      this.locals = container.locals;
+      this.index = index;
    }
    
-   public Vector<Identifier> getGlobalSymbolNames()
+   public LayeValue getValue()
    {
-      Vector<Symbol> symbols = symbolTable.getGlobalSymbols();
-      Vector<Identifier> result = new Vector<Identifier>(symbols.size());
-      for (Symbol symbol : symbols)
-      {
-         result.addElement(symbol.name);
-      }
-      return result;
+      return locals[index];
    }
-
-   public FunctionPrototype compile(Ast ast)
+   
+   public void setValue(LayeValue value)
    {
-      ast.visit(fnCompiler);
-      return fnCompiler.getFunctionPrototype();
+      locals[index] = value;
+   }
+   
+   public void close()
+   {
+      LayeValue[] old = locals;
+      locals = new LayeValue[] { old[index] };
+      old[index] = null;
+      index = 0;
+   }
+   
+   public int getIndex()
+   {
+      return index;
    }
 }

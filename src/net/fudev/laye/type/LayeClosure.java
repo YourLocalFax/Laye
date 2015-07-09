@@ -26,6 +26,7 @@ package net.fudev.laye.type;
 import net.fudev.laye.TypeDef;
 import net.fudev.laye.codegen.FunctionPrototype;
 import net.fudev.laye.vm.StackFrame;
+import net.fudev.laye.vm.UpValue;
 
 /**
  * @author Sekai Kyoretsuna
@@ -37,11 +38,14 @@ public class LayeClosure extends LayeValue
    public final StackFrame definedFrame;
    public final FunctionPrototype prototype;
    
+   private final UpValue[] capturedUpValues;
+   
    public LayeClosure(StackFrame definedFrame, FunctionPrototype prototype)
    {
       super(TYPEDEF_CLOSURE);
       this.definedFrame = definedFrame;
       this.prototype = prototype;
+      this.capturedUpValues = new UpValue[prototype.maxStackCount];
    }
    
    @Override

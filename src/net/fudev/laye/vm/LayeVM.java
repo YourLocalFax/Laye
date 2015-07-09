@@ -118,7 +118,7 @@ public class LayeVM
          return LayeValue.NULL;
       }
       
-      final LayeValue result = callStack.last();
+      final LayeValue result = callStack.peek();
       callStack.endFrame();
       return result;
    }
