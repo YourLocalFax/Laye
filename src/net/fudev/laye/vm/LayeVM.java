@@ -23,9 +23,6 @@
  */
 package net.fudev.laye.vm;
 
-import java.util.Arrays;
-import java.util.Vector;
-
 import net.fudev.laye.GlobalState;
 import net.fudev.laye.codegen.FunctionPrototype;
 import net.fudev.laye.struct.Identifier;
@@ -133,11 +130,29 @@ public class LayeVM
       final int sb = Instruction.GET_SB(insn);
       final int sc = Instruction.GET_SC(insn);
       
+      final UpValue[] currentUpValues = callStack.getTop().currentUpValues;
+      
       switch (op)
       {
          default:
          {
             throw new RuntimeException(String.format("unrecognized op code 0x%02X", op));
+         }
+            
+            /**
+             * 
+             */
+         case OpCode.CLOSE:
+         {
+            for (int i = currentUpValues.length; --i >= a;)
+            {
+               if (currentUpValues[i] != null)
+               {
+                  currentUpValues[i].close();
+                  currentUpValues[i] = null;
+               }
+            }
+            return;
          }
             
             /**
@@ -258,6 +273,7 @@ public class LayeVM
          {
             FunctionPrototype prototype = callStack.getTop().closure.prototype.nestedFunctions[a];
             LayeClosure closure = new LayeClosure(callStack.getTop(), prototype);
+            
             callStack.push(closure);
             return;
          }
@@ -284,8 +300,7 @@ public class LayeVM
          }
             
             /**
-             * A = new insn index.
-             * B = testFor value.
+             * A = new insn index. B = testFor value.
              */
          case OpCode.TEST:
          {

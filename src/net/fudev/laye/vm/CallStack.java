@@ -57,6 +57,7 @@ class CallStack
    public void endFrame()
    {
       frameCount--;
+      top.end();
       top = top.parent;
    }
    

@@ -38,6 +38,7 @@ public class StackFrame
    
    final LayeValue[] stack;
    final LayeValue[] locals;
+   final UpValue[] currentUpValues;
    
    int insnPtr = 0;
    private int stackPtr = 0;
@@ -53,6 +54,23 @@ public class StackFrame
       this.maxStackCount = closure.prototype.maxStackCount;
       this.locals = new LayeValue[localCount];
       this.stack = new LayeValue[maxStackCount];
+      this.currentUpValues = closure.prototype.nestedFunctions.length > 0
+            ? new UpValue[maxStackCount] : null;
+   }
+   
+   void end()
+   {
+      // TODO original checks for if returned, maybe fail for generators?
+      if (currentUpValues != null)
+      {
+         for (int i = currentUpValues.length; --i >= 0;)
+         {
+            if (currentUpValues[i] != null)
+            {
+               currentUpValues[i].close();
+            }
+         }
+      }
    }
    
    // TODO do we need this?
@@ -89,7 +107,7 @@ public class StackFrame
       }
       return stack[idx];
    }
-
+   
    LayeValue peek()
    {
       return stack[stackPtr - 1];
