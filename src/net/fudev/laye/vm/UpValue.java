@@ -33,9 +33,9 @@ public class UpValue
    private LayeValue[] locals;
    private int index;
    
-   public UpValue(StackFrame container, int index)
+   public UpValue(LayeValue[] locals, int index)
    {
-      this.locals = container.locals;
+      this.locals = locals;
       this.index = index;
    }
    

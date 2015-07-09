@@ -39,11 +39,12 @@ public final class FunctionPrototype
    public final int maxStackCount;
    
    public final FunctionPrototype[] nestedFunctions;
-
+   public final UpValueInfo[] upValues;
+   
    public final Object[] constants;
    
    FunctionPrototype(int[] body, int numArgs, boolean variadic, int localCount, int maxStackCount,
-         FunctionPrototype[] nestedFunctions, Object[] constants)
+         FunctionPrototype[] nestedFunctions, UpValueInfo[] upValues, Object[] constants)
    {
       this.body = Arrays.copyOf(body, body.length);
       this.numArgs = numArgs;
@@ -51,6 +52,7 @@ public final class FunctionPrototype
       this.localCount = localCount;
       this.maxStackCount = maxStackCount;
       this.nestedFunctions = nestedFunctions;
+      this.upValues = upValues;
       this.constants = constants;
    }
 }

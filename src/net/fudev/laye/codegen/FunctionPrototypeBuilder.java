@@ -46,6 +46,8 @@ class FunctionPrototypeBuilder
    private int maxStackCount = 0;
    
    private final Vector<FunctionPrototype> nestedFunctions = new Vector<>();
+   private final Vector<UpValueInfo> upValues = new Vector<>();
+   
    private final Vector<Object> constants = new Vector<>();
    
    private int currentStackCount = 0;
@@ -59,10 +61,11 @@ class FunctionPrototypeBuilder
       int[] body = Util.listToIntArray(this.body);
       FunctionPrototype[] nestedFunctions = this.nestedFunctions
             .toArray(new FunctionPrototype[this.nestedFunctions.size()]);
+      UpValueInfo[] upValues = this.upValues.toArray(new UpValueInfo[this.upValues.size()]);
       Object[] constants = this.constants.toArray(new Object[this.constants.size()]);
       
       return new FunctionPrototype(body, numArgs, variadic, localCount, maxStackCount,
-            nestedFunctions, constants);
+            nestedFunctions, upValues, constants);
    }
    
    public void setIsVariadic()

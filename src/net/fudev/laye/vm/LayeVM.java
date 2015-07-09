@@ -25,6 +25,7 @@ package net.fudev.laye.vm;
 
 import net.fudev.laye.GlobalState;
 import net.fudev.laye.codegen.FunctionPrototype;
+import net.fudev.laye.codegen.UpValueInfo;
 import net.fudev.laye.struct.Identifier;
 import net.fudev.laye.struct.Operator;
 import net.fudev.laye.type.LayeClosure;
@@ -38,6 +39,26 @@ import net.fudev.laye.util.Assert;
  */
 public class LayeVM
 {
+   private static UpValue findUpValue(LayeValue[] locals, int idx, UpValue[] openUps)
+   {
+      for (int i = 0; i < openUps.length; i++)
+      {
+         if (openUps[i] != null && openUps[i].getIndex() == idx)
+         {
+            return openUps[i];
+         }
+      }
+      for (int i = 0; i < openUps.length; i++)
+      {
+         if (openUps[i] == null)
+         {
+            return openUps[i] = new UpValue(locals, idx);
+         }
+      }
+      // TODO change this some please?
+      throw new IllegalArgumentException("no space for new upvalue.");
+   }
+   
    private GlobalState state;
    private CallStack callStack;
    
@@ -273,6 +294,21 @@ public class LayeVM
          {
             FunctionPrototype prototype = callStack.getTop().closure.prototype.nestedFunctions[a];
             LayeClosure closure = new LayeClosure(callStack.getTop(), prototype);
+            
+            UpValueInfo[] protoUpValues = prototype.upValues;
+            for (int i = 0; i < protoUpValues.length; i++)
+            {
+               if (protoUpValues[i].type == UpValueInfo.Type.LOCAL)
+               {
+                  closure.capturedUpValues[i] = findUpValue(callStack.getTop().locals,
+                        protoUpValues[i].position, currentUpValues);
+               }
+               else
+               {
+                  closure.capturedUpValues[i] = callStack
+                        .getTop().currentUpValues[protoUpValues[i].position];
+               }
+            }
             
             callStack.push(closure);
             return;

@@ -38,7 +38,8 @@ public class LayeClosure extends LayeValue
    public final StackFrame definedFrame;
    public final FunctionPrototype prototype;
    
-   private final UpValue[] capturedUpValues;
+   // TODO make NOT public, eventually move the VM to a place where it can see this.
+   public final UpValue[] capturedUpValues;
    
    public LayeClosure(StackFrame definedFrame, FunctionPrototype prototype)
    {
