@@ -163,7 +163,7 @@ public class LayeVM
             /**
              * 
              */
-         case OpCode.CLOSE:
+         case OpCode.CLOSE_UP_VALUES:
          {
             for (int i = currentUpValues.length; --i >= a;)
             {
