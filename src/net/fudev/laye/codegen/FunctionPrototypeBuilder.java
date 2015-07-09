@@ -25,7 +25,6 @@ package net.fudev.laye.codegen;
 
 import java.util.Vector;
 
-import net.fudev.laye.Laye;
 import net.fudev.laye.codegen.info.LocalValueInfo;
 import net.fudev.laye.codegen.info.UpValueInfo;
 import net.fudev.laye.struct.Identifier;
@@ -122,9 +121,7 @@ class FunctionPrototypeBuilder
          int c = body.get(i);
          if (Instruction.GET_OP(c) == OpCode.RETURN)
          {
-            final boolean isResultRequired = Instruction.GET_B(c) == 1;
-            body.set(i, Instruction.SET_A(
-                  Instruction.SET_B(OpCode.RETURN, isResultRequired ? 1 : 0), endPosition - i));
+            body.set(i, Instruction.SET_A(OpCode.RETURN, endPosition - i));
          }
       }
       final int oldUpValueCount = getUpValueCount();
@@ -166,6 +163,7 @@ class FunctionPrototypeBuilder
       if (local == -1)
       {
          // TODO print an error, duplicate local value
+         throw new RuntimeException("duplicate local variable " + name);
       }
       return local;
    }

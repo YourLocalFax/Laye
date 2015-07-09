@@ -45,7 +45,8 @@ public class LayeCompiler
    {
       this.console = console;
       symbolTable = new SymbolTable();
-      fnCompiler = new FunctionCompiler(this.console, symbolTable, new FunctionPrototypeBuilder());
+      fnCompiler = new FunctionCompiler(this.console, symbolTable,
+            new FunctionPrototypeBuilder(null));
    }
    
    public Vector<Identifier> getGlobalSymbolNames()
@@ -58,7 +59,7 @@ public class LayeCompiler
       }
       return result;
    }
-
+   
    public FunctionPrototype compile(Ast ast)
    {
       ast.visit(fnCompiler);

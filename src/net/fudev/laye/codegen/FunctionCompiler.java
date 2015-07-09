@@ -82,7 +82,7 @@ public class FunctionCompiler implements AstVisitor
       {
          symbolTable.addSymbol(node.name);
       }
-      FunctionPrototypeBuilder newBuilder = new FunctionPrototypeBuilder();
+      FunctionPrototypeBuilder newBuilder = new FunctionPrototypeBuilder(builder);
       for (Identifier name : node.params)
       {
          newBuilder.addParameter(name);
