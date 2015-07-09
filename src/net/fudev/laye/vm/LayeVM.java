@@ -25,7 +25,7 @@ package net.fudev.laye.vm;
 
 import net.fudev.laye.GlobalState;
 import net.fudev.laye.codegen.FunctionPrototype;
-import net.fudev.laye.codegen.UpValueInfo;
+import net.fudev.laye.codegen.info.UpValueInfo;
 import net.fudev.laye.struct.Identifier;
 import net.fudev.laye.struct.Operator;
 import net.fudev.laye.type.LayeClosure;
@@ -103,7 +103,7 @@ public class LayeVM
       
       callStack.newFrame(closure, thisObject);
       
-      final int numArgs = closure.prototype.numArgs;
+      final int numArgs = closure.prototype.numParameters;
       final boolean variadic = closure.prototype.variadic;
       
       for (int i = 0; i < args.length; i++)
@@ -302,12 +302,12 @@ public class LayeVM
                if (protoUpValues[i].type == UpValueInfo.Type.LOCAL)
                {
                   closure.capturedUpValues[i] = findUpValue(callStack.getTop().locals,
-                        protoUpValues[i].position, currentUpValues);
+                        protoUpValues[i].index, currentUpValues);
                }
                else // if (protoUpValues[i].type == UpValueInfo.Type.UP_VALUE)
                {
                   closure.capturedUpValues[i] = callStack
-                        .getTop().currentUpValues[protoUpValues[i].position];
+                        .getTop().currentUpValues[protoUpValues[i].index];
                }
             }
             

@@ -24,6 +24,7 @@ package net.fudev.laye.vm;
 public final class OpCode
 {
    public static final int CLOSE_UP_VALUES = 0x00;
+   
    public static final int POP = 0x01;
    public static final int DUP = 0x02;
    

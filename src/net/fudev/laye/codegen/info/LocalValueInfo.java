@@ -21,41 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package net.fudev.laye.codegen;
 
-import java.util.Arrays;
+package net.fudev.laye.codegen.info;
 
-import net.fudev.laye.codegen.info.UpValueInfo;
+import net.fudev.laye.struct.Identifier;
 
 /**
  * @author Sekai Kyoretsuna
  */
-public final class FunctionPrototype
+public class LocalValueInfo
 {
-   public final int[] body;
+   public Identifier name;
+   public int index;
    
-   public final int numParameters;
-   public final boolean variadic;
+   private boolean isUpValue = false;
    
-   public final int localCount;
-   public final int maxStackCount;
-   
-   public final FunctionPrototype[] nestedFunctions;
-   public final UpValueInfo[] upValues;
-   
-   public final Object[] constants;
-   
-   FunctionPrototype(int[] body, int numParameters, boolean variadic, int localCount,
-         int maxStackCount, FunctionPrototype[] nestedFunctions, UpValueInfo[] upValues,
-         Object[] constants)
+   public LocalValueInfo(Identifier name, int index)
    {
-      this.body = Arrays.copyOf(body, body.length);
-      this.numParameters = numParameters;
-      this.variadic = variadic;
-      this.localCount = localCount;
-      this.maxStackCount = maxStackCount;
-      this.nestedFunctions = nestedFunctions;
-      this.upValues = upValues;
-      this.constants = constants;
+      this.name = name;
+      this.index = index;
+   }
+
+   private LocalValueInfo(Identifier name, int index, boolean isUpValue)
+   {
+      this.name = name;
+      this.index = index;
+      this.isUpValue = isUpValue;
+   }
+   
+   public LocalValueInfo copy()
+   {
+      return new LocalValueInfo(name, index, isUpValue);
+   }
+   
+   public void markAsUpValue()
+   {
+      isUpValue = true;
+   }
+   
+   public boolean isUpValue()
+   {
+      return isUpValue;
    }
 }

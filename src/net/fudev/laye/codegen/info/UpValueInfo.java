@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package net.fudev.laye.codegen;
+package net.fudev.laye.codegen.info;
 
 import net.fudev.laye.struct.Identifier;
 
@@ -36,20 +36,20 @@ public class UpValueInfo
    }
    
    public final Identifier name;
-   public final int position;
+   public final int index;
    
    public Type type;
    
    public UpValueInfo(Identifier name, int position, Type type)
    {
       this.name = name;
-      this.position = position;
+      this.index = position;
       this.type = type;
    }
    
    public UpValueInfo(UpValueInfo other)
    {
-      this(other.name, other.position, other.type);
+      this(other.name, other.index, other.type);
    }
    
    @Override
@@ -58,7 +58,7 @@ public class UpValueInfo
       final int prime = 31;
       int result = 1;
       result = prime * result + ((name == null) ? 0 : name.hashCode());
-      result = prime * result + position;
+      result = prime * result + index;
       result = prime * result + ((type == null) ? 0 : type.hashCode());
       return result;
    }
@@ -90,7 +90,7 @@ public class UpValueInfo
       {
          return false;
       }
-      if (position != other.position)
+      if (index != other.index)
       {
          return false;
       }

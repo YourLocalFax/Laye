@@ -85,7 +85,7 @@ public class FunctionCompiler implements AstVisitor
       FunctionPrototypeBuilder newBuilder = new FunctionPrototypeBuilder();
       for (Identifier name : node.params)
       {
-         newBuilder.addArgument(name);
+         newBuilder.addParameter(name);
       }
       if (node.isVariadic)
       {
