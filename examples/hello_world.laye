@@ -1,0 +1,6 @@
+extern Print
+
+fn Main
+{
+   Print("Hello, world!")
+}
