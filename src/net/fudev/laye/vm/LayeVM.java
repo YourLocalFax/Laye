@@ -295,6 +295,7 @@ public class LayeVM
             FunctionPrototype prototype = callStack.getTop().closure.prototype.nestedFunctions[a];
             LayeClosure closure = new LayeClosure(callStack.getTop(), prototype);
             
+            // Handle up-values
             UpValueInfo[] protoUpValues = prototype.upValues;
             for (int i = 0; i < protoUpValues.length; i++)
             {
@@ -303,7 +304,7 @@ public class LayeVM
                   closure.capturedUpValues[i] = findUpValue(callStack.getTop().locals,
                         protoUpValues[i].position, currentUpValues);
                }
-               else
+               else // if (protoUpValues[i].type == UpValueInfo.Type.UP_VALUE)
                {
                   closure.capturedUpValues[i] = callStack
                         .getTop().currentUpValues[protoUpValues[i].position];
