@@ -351,6 +351,17 @@ public class LayeVM
          }
             
             /**
+             * A = new insn index.
+             */
+         case OpCode.JUMP:
+         {
+            callStack.getTop().insnPtr = a;
+            return;
+         }
+            
+            // TODO more
+            
+            /**
              * STACK -A
              * 
              * A = Number of arguments.
