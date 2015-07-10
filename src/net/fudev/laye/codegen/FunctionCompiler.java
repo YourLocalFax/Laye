@@ -211,6 +211,8 @@ public class FunctionCompiler implements AstVisitor
    @Override
    public void accept(NodeBlock node)
    {
+      builder.beginBlock();
       node.body.forEach(n -> n.visit(this));
+      builder.endBlock();
    }
 }

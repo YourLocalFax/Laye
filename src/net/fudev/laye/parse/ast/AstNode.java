@@ -39,6 +39,8 @@ public abstract class AstNode implements Iterable<AstNode>
    
    public final Location location;
    
+   public boolean hasResult = true;
+   
    public AstNode(Location location)
    {
       this.location = location;
