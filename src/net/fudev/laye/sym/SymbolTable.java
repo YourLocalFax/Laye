@@ -69,7 +69,7 @@ public class SymbolTable
       }
       else
       {
-         currentScope.addSymbol(Symbol.Type.LOCAL, name, nextLocalIndex++);
+         currentScope.addSymbol(Symbol.Type.LOCAL_VALUE, name, nextLocalIndex++);
       }
    }
    
@@ -95,8 +95,18 @@ public class SymbolTable
    
    public Vector<Symbol> getGlobalSymbols()
    {
-      Vector<Symbol> result = new Vector<>(globalScope.getSymbols());
+      Vector<Symbol> result = new Vector<>(globalScope.getGlobalValueSymbols());
       Collections.sort(result);
       return result;
+   }
+
+   public Vector<Symbol> getCurrentLocalSymbols()
+   {
+      return currentScope.getLocalValueSymbols();
+   }
+
+   public Vector<Symbol> getCurrentUpValueSymbols()
+   {
+      return currentScope.getUpValueSymbols();
    }
 }

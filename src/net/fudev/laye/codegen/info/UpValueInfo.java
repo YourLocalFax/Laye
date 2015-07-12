@@ -38,18 +38,15 @@ public class UpValueInfo
    public final Identifier name;
    public final int index;
    
-   public Type type;
-   
-   public UpValueInfo(Identifier name, int position, Type type)
+   public UpValueInfo(Identifier name, int position)
    {
       this.name = name;
       this.index = position;
-      this.type = type;
    }
    
    public UpValueInfo(UpValueInfo other)
    {
-      this(other.name, other.index, other.type);
+      this(other.name, other.index);
    }
    
    @Override
@@ -59,7 +56,6 @@ public class UpValueInfo
       int result = 1;
       result = prime * result + ((name == null) ? 0 : name.hashCode());
       result = prime * result + index;
-      result = prime * result + ((type == null) ? 0 : type.hashCode());
       return result;
    }
    
@@ -91,10 +87,6 @@ public class UpValueInfo
          return false;
       }
       if (index != other.index)
-      {
-         return false;
-      }
-      if (type != other.type)
       {
          return false;
       }

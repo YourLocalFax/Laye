@@ -28,6 +28,7 @@ import java.util.Vector;
 import net.fudev.laye.codegen.info.LocalValueInfo;
 import net.fudev.laye.codegen.info.UpValueInfo;
 import net.fudev.laye.struct.Identifier;
+import net.fudev.laye.sym.Symbol;
 import net.fudev.laye.type.LayeString;
 import net.fudev.laye.type.LayeValue;
 import net.fudev.laye.util.Util;
@@ -66,10 +67,6 @@ class FunctionPrototypeBuilder
    private int maxStackCount = 0;
    
    private final Vector<FunctionPrototype> nestedFunctions = new Vector<>();
-   
-   private final Vector<UpValueInfo> upValues = new Vector<>();
-   private final Vector<LocalValueInfo> localValues = new Vector<>();
-   
    private final Vector<Object> constants = new Vector<>();
    
    private int currentStackCount = 0;
@@ -81,12 +78,12 @@ class FunctionPrototypeBuilder
       this.parent = parent;
    }
    
-   public FunctionPrototype build()
+   public FunctionPrototype build(Vector<Symbol> upValueSymbols)
    {
       int[] body = Util.listToIntArray(this.body);
       FunctionPrototype[] nestedFunctions = this.nestedFunctions
             .toArray(new FunctionPrototype[this.nestedFunctions.size()]);
-      UpValueInfo[] upValues = this.upValues.toArray(new UpValueInfo[this.upValues.size()]);
+      Symbol[] upValues = upValueSymbols.toArray(new Symbol[upValueSymbols.size()]);
       Object[] constants = this.constants.toArray(new Object[this.constants.size()]);
       
       return new FunctionPrototype(body, numParameters, variadic, localCount, maxStackCount,
@@ -210,14 +207,14 @@ class FunctionPrototypeBuilder
             index = parent.getUpValueIndex(name);
             if (index != -1)
             {
-               upValues.addElement(new UpValueInfo(name, index, UpValueInfo.Type.UP_VALUE));
+               upValues.addElement(new UpValueInfo(name, index));
                return upValueCount++;
             }
          }
          else
          {
             parent.markLocalValueAsUpValue(index);
-            upValues.addElement(new UpValueInfo(name, index, UpValueInfo.Type.LOCAL));
+            upValues.addElement(new UpValueInfo(name, index));
             return upValueCount++;
          }
       }
