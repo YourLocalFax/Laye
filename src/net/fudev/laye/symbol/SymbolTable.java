@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package net.fudev.laye.sym;
+package net.fudev.laye.symbol;
 
 import java.util.Collections;
 import java.util.Vector;

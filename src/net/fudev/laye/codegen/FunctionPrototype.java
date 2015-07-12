@@ -25,7 +25,7 @@ package net.fudev.laye.codegen;
 
 import java.util.Arrays;
 
-import net.fudev.laye.sym.Symbol;
+import net.fudev.laye.symbol.Symbol;
 
 /**
  * @author Sekai Kyoretsuna

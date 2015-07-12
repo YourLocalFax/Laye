@@ -28,7 +28,7 @@ import java.util.Vector;
 import net.fudev.laye.codegen.info.LocalValueInfo;
 import net.fudev.laye.codegen.info.UpValueInfo;
 import net.fudev.laye.struct.Identifier;
-import net.fudev.laye.sym.Symbol;
+import net.fudev.laye.symbol.Symbol;
 import net.fudev.laye.type.LayeString;
 import net.fudev.laye.type.LayeValue;
 import net.fudev.laye.util.Util;
@@ -62,7 +62,6 @@ class FunctionPrototypeBuilder
    private int numParameters = 0;
    private boolean variadic = false;
    
-   private int localCount = 0;
    private int upValueCount = 0;
    private int maxStackCount = 0;
    
@@ -78,16 +77,29 @@ class FunctionPrototypeBuilder
       this.parent = parent;
    }
    
-   public FunctionPrototype build(Vector<Symbol> upValueSymbols)
+   public FunctionPrototype build(int localCount, Vector<Symbol> upValueSymbols)
    {
       int[] body = Util.listToIntArray(this.body);
       FunctionPrototype[] nestedFunctions = this.nestedFunctions
             .toArray(new FunctionPrototype[this.nestedFunctions.size()]);
-      Symbol[] upValues = upValueSymbols.toArray(new Symbol[upValueSymbols.size()]);
+      Symbol[] upValues;
+      if (upValueSymbols != null)
+      {
+         upValues = upValueSymbols.toArray(new Symbol[upValueSymbols.size()]);
+      }
+      else
+      {
+         upValues = new Symbol[0];
+      }
       Object[] constants = this.constants.toArray(new Object[this.constants.size()]);
       
       return new FunctionPrototype(body, numParameters, variadic, localCount, maxStackCount,
             nestedFunctions, upValues, constants);
+   }
+   
+   public void setNumParameters(int params)
+   {
+      numParameters = params;
    }
    
    public void setIsVariadic()
@@ -95,22 +107,22 @@ class FunctionPrototypeBuilder
       variadic = true;
    }
    
-   public int getLocalCount()
+   private int getLocalCount()
    {
       return localCount;
    }
    
-   public int getUpValueCount()
+   private int getUpValueCount()
    {
       return upValueCount;
    }
    
-   public void beginBlock()
+   private void beginBlock()
    {
       currentBlock = new Block(currentBlock);
    }
    
-   public void endBlock()
+   private void endBlock()
    {
       int endPosition = getCurrentPosition();
       for (int i = currentBlock.startPosition + 1; i < endPosition; i++)
@@ -148,13 +160,13 @@ class FunctionPrototypeBuilder
       return pos;
    }
    
-   public int addParameter(Identifier name)
+   private int addParameter(Identifier name)
    {
       numParameters++;
       return allocateLocalVariable(name);
    }
    
-   public int addLocal(Identifier name)
+   private int addLocal(Identifier name)
    {
       int local = allocateLocalVariable(name);
       if (local == -1)
@@ -165,7 +177,7 @@ class FunctionPrototypeBuilder
       return local;
    }
    
-   public int getLocalIndex(Identifier name)
+   private int getLocalIndex(Identifier name)
    {
       for (LocalValueInfo val : localValues)
       {
@@ -177,7 +189,7 @@ class FunctionPrototypeBuilder
       return -1;
    }
    
-   public Identifier getLocalName(int localIndex)
+   private Identifier getLocalName(int localIndex)
    {
       for (LocalValueInfo val : localValues)
       {
@@ -189,7 +201,7 @@ class FunctionPrototypeBuilder
       return null;
    }
    
-   public int getUpValueIndex(Identifier name)
+   private int getUpValueIndex(Identifier name)
    {
       for (int i = 0; i < upValueCount; i++)
       {
@@ -221,7 +233,7 @@ class FunctionPrototypeBuilder
       return -1;
    }
    
-   public Identifier getUpValueName(int upValueIndex)
+   private Identifier getUpValueName(int upValueIndex)
    {
       for (UpValueInfo val : upValues)
       {
@@ -239,7 +251,7 @@ class FunctionPrototypeBuilder
       upValueCount++;
    }
    
-   public void setLocalsSize(int n)
+   private void setLocalsSize(int n)
    {
       int size = localCount;
       while (size > n)

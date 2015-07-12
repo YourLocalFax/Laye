@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package net.fudev.laye.sym;
+package net.fudev.laye.symbol;
 
 import java.util.Vector;
 
@@ -33,6 +33,22 @@ import net.fudev.laye.struct.Identifier;
  */
 public class Scope
 {
+   private final class Block
+   {
+      public final Block previous;
+      
+      public int initialLocalsSize;
+      public int startPosition;
+      
+      public Block(Block previous)
+      {
+         this.previous = previous;
+         // TODO move this
+         startPosition = getCurrentPosition();
+         initialLocalsSize = localValues.size();
+      }
+   }
+   
    private final Vector<Symbol> globalValues = new Vector<>();
    private final Vector<Symbol> localValues = new Vector<>();
    private final Vector<Symbol> upValues = new Vector<>();
@@ -40,6 +56,8 @@ public class Scope
    private final Vector<Scope> children = new Vector<>();
    
    public final Scope parent;
+   
+   private Block block = null;
    
    public Scope()
    {
@@ -49,6 +67,11 @@ public class Scope
    public Scope(Scope parent)
    {
       this.parent = parent;
+   }
+   
+   public void beginBlock()
+   {
+      block = new Block(block);
    }
    
    public int addSymbol(Symbol.Type type, Identifier name, int index)
