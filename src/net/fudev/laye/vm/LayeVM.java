@@ -173,8 +173,7 @@ public class LayeVM
                   currentUpValues[i] = null;
                }
             }
-            return;
-         }
+         } return;
             
             /**
              * STACK -1
@@ -184,8 +183,7 @@ public class LayeVM
          case OpCode.POP:
          {
             callStack.pop();
-            return;
-         }
+         } return;
             
             /**
              * STACK +1
@@ -195,8 +193,7 @@ public class LayeVM
          case OpCode.DUP:
          {
             callStack.push(callStack.get(-1));
-            return;
-         }
+         } return;
             
             /**
              * STACK +1
@@ -209,8 +206,7 @@ public class LayeVM
          {
             LayeValue value = callStack.load(a);
             callStack.push(value);
-            return;
-         }
+         } return;
             
             /**
              * STACK -1
@@ -223,8 +219,7 @@ public class LayeVM
          {
             LayeValue value = callStack.pop();
             callStack.store(a, value);
-            return;
-         }
+         } return;
             
             /**
              * STACK +1
@@ -237,8 +232,7 @@ public class LayeVM
          {
             LayeValue value = state.load(a);
             callStack.push(value);
-            return;
-         }
+         } return;
             
             /**
              * STACK -1
@@ -251,8 +245,7 @@ public class LayeVM
          {
             LayeValue value = callStack.pop();
             state.store(a, value);
-            return;
-         }
+         } return;
             
             // TODO LOAD_INDEX, STORE_INDEX
             
@@ -266,8 +259,7 @@ public class LayeVM
          case OpCode.LOAD_NULL:
          {
             callStack.push(LayeValue.NULL);
-            return;
-         }
+         } return;
             
             /**
              * STACK +1
@@ -280,8 +272,7 @@ public class LayeVM
          {
             LayeValue value = (LayeValue) callStack.getTop().closure.prototype.constants[a];
             callStack.push(value);
-            return;
-         }
+         } return;
             
             /*
              * STACK +1
@@ -312,8 +303,7 @@ public class LayeVM
             }
             
             callStack.push(closure);
-            return;
-         }
+         } return;
             
             // TODO BUILD_TYPE
             
@@ -333,8 +323,7 @@ public class LayeVM
             Operator operator = (Operator) callStack.getTop().closure.prototype.constants[a];
             LayeValue right = callStack.pop(), left = callStack.pop();
             callStack.push(left.infix(this, operator, right));
-            return;
-         }
+         } return;
             
             /**
              * A = new insn index. B = testFor value.
@@ -347,8 +336,7 @@ public class LayeVM
             {
                callStack.getTop().insnPtr = a;
             }
-            return;
-         }
+         } return;
             
             /**
              * A = new insn index.
@@ -356,8 +344,7 @@ public class LayeVM
          case OpCode.JUMP:
          {
             callStack.getTop().insnPtr = a;
-            return;
-         }
+         } return;
             
             // TODO more
             
@@ -375,7 +362,7 @@ public class LayeVM
             LayeValue target = callStack.pop();
             LayeValue result = invoke(target, null, arguments);
             callStack.push(result);
-         }
+         } return;
       }
    }
    
