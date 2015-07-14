@@ -23,6 +23,8 @@
  */
 package net.fudev.laye.vm;
 
+import java.util.Arrays;
+
 import net.fudev.laye.GlobalState;
 import net.fudev.laye.codegen.FunctionPrototype;
 import net.fudev.laye.codegen.info.UpValueInfo;

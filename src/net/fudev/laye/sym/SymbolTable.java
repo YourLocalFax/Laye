@@ -61,7 +61,7 @@ public class SymbolTable
       }
    }
    
-   public void addSymbol(Identifier name)
+   public Symbol addSymbol(Identifier name)
    {
       if (currentScope == globalScope)
       {
@@ -71,6 +71,7 @@ public class SymbolTable
       {
          currentScope.addSymbol(Symbol.Type.LOCAL, name, nextLocalIndex++);
       }
+      return getSymbol(name);
    }
    
    public boolean isSymbolDefined(Identifier name)

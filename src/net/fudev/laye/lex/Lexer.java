@@ -160,6 +160,9 @@ public class Lexer
             case ',':
                readChar();
                return new Token(Token.Type.COMMA, line, column);
+            case '=':
+               readChar();
+               return new Token(Token.Type.ASSIGN, line, column);
             case '\'':
             case '"':
                return lexStringLiteral();

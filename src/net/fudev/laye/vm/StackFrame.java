@@ -41,7 +41,7 @@ public class StackFrame
    final UpValue[] currentUpValues;
    
    int insnPtr = 0;
-   private int stackPtr = 0;
+   int stackPtr = 0;
    
    boolean abortExecution = false;
    
@@ -110,6 +110,10 @@ public class StackFrame
    
    LayeValue peek()
    {
+      if (stackPtr == 0)
+      {
+         return LayeValue.NULL;
+      }
       return stack[stackPtr - 1];
    }
 }

@@ -70,7 +70,6 @@ public final class Keyword
 
    public static final String STR_FN = "fn";
    public static final String STR_TYPE = "type";
-   public static final String STR_LAMBDA = "lambda";
    public static final String STR_EXTERN = "extern";
    public static final String STR_USE = "use";
    
@@ -111,7 +110,6 @@ public final class Keyword
 
    public static final Keyword FN = addKeyword(STR_FN);
    public static final Keyword TYPE = addKeyword(STR_TYPE);
-   public static final Keyword LAMBDA = addKeyword(STR_LAMBDA);
    public static final Keyword EXTERN = addKeyword(STR_EXTERN);
    public static final Keyword USE = addKeyword(STR_USE);
    

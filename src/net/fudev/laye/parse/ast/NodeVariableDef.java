@@ -22,34 +22,31 @@
  * THE SOFTWARE.
  */
 
-package net.fudev.laye.parse;
+package net.fudev.laye.parse.ast;
 
-import net.fudev.laye.parse.ast.*;
+import net.fudev.laye.parse.AstVisitor;
+import net.fudev.laye.parse.Location;
+import net.fudev.laye.struct.Identifier;
 
 /**
  * @author Sekai Kyoretsuna
  */
-public interface AstVisitor
+public class NodeVariableDef extends NodeExpression
 {
-   void accept(Ast node);
-
-   void accept(NodeVariableDef node);
+   public Identifier name = null;
+   public NodeExpression value = null;
    
-   void accept(NodeFunctionDef node);
+   /**
+    * @param location
+    */
+   public NodeVariableDef(Location location)
+   {
+      super(location);
+   }
    
-   void accept(NodeInfixExpression node);
-
-   void accept(NodePostfixExpression node);
-
-   void accept(NodeIdentifier node);
-
-   void accept(NodeFunctionCall node);
-
-   void accept(NodeIntLiteral node);
-
-   void accept(NodeStringLiteral node);
-
-   void accept(NodeExternDecl node);
-
-   void accept(NodeBlock node);
+   @Override
+   public void visit(AstVisitor visitor)
+   {
+      visitor.accept(this);
+   }
 }

@@ -48,6 +48,12 @@ public class Parser
       this.console = console;
    }
    
+   private void consoleError(String message)
+   {
+      Token lastToken = tokens.getToken();
+      console.error("(Parser) line " + lastToken.line + " (column " + lastToken.column + "): " + message);
+   }
+   
    /**
     * @return
     */
@@ -62,8 +68,7 @@ public class Parser
          if (next == null)
          {
             Token token = tokens.getToken();
-            console.error("(Parser) line " + token.line + " (column " + token.column
-                  + "): unable to parse at token " + token);
+            consoleError("unable to parse at token " + token);
             return null;
          }
          result.addChild(next);
@@ -95,6 +100,10 @@ public class Parser
                {
                   return parseFunctionDefinition();
                }
+               case Keyword.STR_VAR:
+               {
+                  return parseVariableDefinition();
+               }
             }
             break;
          }
@@ -114,7 +123,7 @@ public class Parser
          {
             if (result.size() > 0)
             {
-               console.error("(Parser) comma expression encountered invalid expression.");
+               consoleError("(comma expression encountered invalid expression.");
                return null;
             }
             return result;
@@ -178,13 +187,17 @@ public class Parser
       {
          case OPEN_BRACE:
          {
+            if (!allowPostfixCall)
+            {
+               return target;
+            }
             NodeFunctionCall result = new NodeFunctionCall(tokens.getLocation(), target);
             // Lex '('
             tokens.getNextToken();
             result.arguments = parseCommaSeparatedExpressions();
             if (result.arguments == null)
             {
-               console.error("(Parser) failed to parse function arguments.");
+               consoleError("failed to parse function arguments.");
                return null;
             }
             tokens.expect(Token.Type.CLOSE_BRACE);
@@ -245,7 +258,7 @@ public class Parser
       extern.name = tokens.expectIdentifier();
       if (extern.name == null)
       {
-         console.error("(Parser) extern name expected.");
+         consoleError("extern name expected.");
          return null;
       }
       
@@ -262,38 +275,81 @@ public class Parser
       fn.name = tokens.expectIdentifier();
       if (fn.name == null)
       {
-         console.error("(Parser) function name expected.");
+         consoleError("function name expected.");
          return null;
       }
       
-      if (tokens.checkTokenType(Token.Type.OPEN_BRACE))
+      // Lex '('
+      if (!tokens.expect(Token.Type.OPEN_BRACE))
       {
-         // Lex '('
-         tokens.getNextToken();
-         while (!tokens.checkTokenType(Token.Type.CLOSE_BRACE))
+         console.error("'(' expected to start function parameter list.");
+         return null;
+      }
+      while (!tokens.checkTokenType(Token.Type.CLOSE_BRACE))
+      {
+         Identifier param = tokens.expectIdentifier();
+         if (param == null)
          {
-            Identifier param = tokens.expectIdentifier();
-            if (param == null)
-            {
-               console.error("(Parser) no parameter name given.");
-               return null;
-            }
-            fn.addParameter(param);
-            // TODO check variadic param and such
-            if (!tokens.checkTokenType(Token.Type.COMMA))
-            {
-               break;
-            }
-            // Lex ','
-            tokens.getNextToken();
+            consoleError("no parameter name given.");
+            return null;
          }
-         // Lex ')'
+         fn.addParameter(param);
+         // TODO check variadic param and such
+         if (!tokens.checkTokenType(Token.Type.COMMA))
+         {
+            break;
+         }
+         // Lex ','
+         tokens.getNextToken();
+      }
+      // Lex ')'
+      tokens.getNextToken();
+      
+      if (!tokens.checkTokenType(Token.Type.SEMI_COLON))
+      {
+         fn.body = parsePrimaryExpression();
+         if (fn.body == null)
+         {
+            consoleError("error parsing function body.");
+         }
+      }
+      else
+      {
+         // Lex ';'
          tokens.getNextToken();
       }
       
-      fn.body = parsePrimaryExpression();
-      
       return fn;
+   }
+   
+   private NodeVariableDef parseVariableDefinition()
+   {
+      NodeVariableDef var = new NodeVariableDef(tokens.getLocation());
+      
+      // Lex 'var'
+      tokens.getNextToken();
+      
+      var.name = tokens.expectIdentifier();
+      if (var.name == null)
+      {
+         consoleError("variable name expected.");
+         return null;
+      }
+      
+      if (tokens.checkTokenType(Token.Type.ASSIGN))
+      {
+         // Lex '='
+         tokens.getNextToken();
+         
+         var.value = parsePrimaryExpression();
+         if (var.value == null)
+         {
+            consoleError("error parsing variable value.");
+         }
+      }
+      // else the value defaults to null.
+      
+      return var;
    }
    
    private NodeBlock parseBlock()
@@ -303,7 +359,13 @@ public class Parser
       tokens.getNextToken();
       while (!tokens.checkTokenType(Token.Type.CLOSE_CURLY_BRACE))
       {
-         result.addElement(parseTopLevel());
+         AstNode node = parseTopLevel();
+         if (node == null)
+         {
+            consoleError("block failed to parse.");
+            return null;
+         }
+         result.addElement(node);
       }
       tokens.expect(Token.Type.CLOSE_CURLY_BRACE);
       return new NodeBlock(location, result);

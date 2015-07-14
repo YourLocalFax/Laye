@@ -26,6 +26,7 @@ package net.fudev.laye.codegen;
 
 import net.fudev.laye.debug.Console;
 import net.fudev.laye.parse.AstVisitor;
+import net.fudev.laye.parse.Location;
 import net.fudev.laye.parse.ast.*;
 import net.fudev.laye.struct.Identifier;
 import net.fudev.laye.sym.Symbol;
@@ -50,8 +51,20 @@ public class FunctionCompiler implements AstVisitor
    
    public FunctionPrototype getFunctionPrototype()
    {
-      builder.addOpLoadNull();
+      //builder.addOpLoadNull();
       return builder.build();
+   }
+   
+   private void consoleWarning(Location location, String message)
+   {
+      console.warning("(FunctionCompiler) line " + location.line + " (column " +
+                      location.column +"): " + message);
+   }
+   
+   private void consoleError(Location location, String message)
+   {
+      console.error("(FunctionCompiler) line " + location.line + " (column " +
+                    location.column +"): " + message);
    }
 
    @Override
@@ -61,46 +74,79 @@ public class FunctionCompiler implements AstVisitor
    }
    
    @Override
-   public void accept(NodeFunctionDef node)
+   public void accept(NodeVariableDef node)
    {
+      Symbol varSymbol;
       if (symbolTable.isSymbolDefined(node.name))
       {
-         console.warning("(FunctionCompiler) line " + node.location.line + " (column "
-               + node.location.column + "): symbol '" + node.name + "' is already defined.");
+         // TODO make it so this can never fail anyway
+         consoleError(node.location, "symbol '" + node.name + "' is already defined.");
+         varSymbol = symbolTable.getSymbol(node.name);
       }
       else
       {
-         symbolTable.addSymbol(node.name);
+         varSymbol = symbolTable.addSymbol(node.name);
       }
+      node.value.visit(this);
+      switch (varSymbol.type)
+      {
+         case GLOBAL:
+         {
+            builder.addOpStoreGlobal(varSymbol.index);
+         } break;
+         case LOCAL:
+         {
+            builder.addLocal(node.name);
+            builder.addOpStoreLocal(varSymbol.index);
+         } break;
+      }
+   }
+   
+   @Override
+   public void accept(NodeFunctionDef node)
+   {
+      Symbol fnSymbol;
+      if (symbolTable.isSymbolDefined(node.name))
+      {
+         // TODO make it so this can never fail anyway.
+         consoleError(node.location, "symbol '" + node.name + "' is already defined.");
+         fnSymbol = symbolTable.getSymbol(node.name);
+      }
+      else
+      {
+         fnSymbol = symbolTable.addSymbol(node.name);
+      }
+      symbolTable.beginScope();
       FunctionPrototypeBuilder newBuilder = new FunctionPrototypeBuilder(builder);
       for (Identifier name : node.params)
       {
+         symbolTable.addSymbol(name);
          newBuilder.addParameter(name);
       }
       if (node.isVariadic)
       {
          newBuilder.setIsVariadic();
       }
-      symbolTable.beginScope();
       FunctionCompiler newCompiler = new FunctionCompiler(console, symbolTable, newBuilder);
-      node.body.visit(newCompiler);
+      if (node.body != null)
+      {
+         node.body.visit(newCompiler);
+      }
       symbolTable.endScope();
       FunctionPrototype newProto = newCompiler.getFunctionPrototype();
       int newProtoIndex = builder.addNestedFunction(newProto);
       builder.addOpBuildClosure(newProtoIndex);
-      Symbol fnSymbol = symbolTable.getSymbol(node.name);
       switch (fnSymbol.type)
       {
          case GLOBAL:
          {
             builder.addOpStoreGlobal(fnSymbol.index);
-            break;
-         }
+         } break;
          case LOCAL:
          {
+            builder.addLocal(node.name);
             builder.addOpStoreLocal(fnSymbol.index);
-            break;
-         }
+         } break;
       }
    }
 
@@ -120,8 +166,7 @@ public class FunctionCompiler implements AstVisitor
       Identifier name = node.name;
       if (!symbolTable.isSymbolDefined(name))
       {
-         console.warning("(FunctionCompiler) line " + node.location.line + " (column "
-               + node.location.column + "): possibly undefined variable '" + name + "'");
+         consoleWarning(node.location, "possible undefined variable '" + name + "'");
       }
       Symbol symbol = symbolTable.getSymbol(name);
       switch (symbol.type)
@@ -129,15 +174,13 @@ public class FunctionCompiler implements AstVisitor
          case GLOBAL:
          {
             builder.addOpLoadGlobal(symbol.index);
-            break;
-         }
+         } break;
          case LOCAL:
          {
             builder.addOpLoadLocal(symbol.index);
-            break;
-         }
+         } break;
          default:
-            console.error("(FunctionCompiler) missing symbol type " + symbol.type + ".");
+            consoleError(node.location, "missing symbol type " + symbol.type + ".");
       }
    }
    
