@@ -74,6 +74,26 @@ public class Scope
       block = new Block(block);
    }
    
+   /**
+    * @return If up values were changed, the location to close to. -1 otherwise.
+    */
+   public int endBlock()
+   {
+      int resultingClosureLocation = -1;
+      // TODO where are we putting the RETURN change?
+      final int oldUpValueCount = upValues.size();
+      if (localValues.size() != block.initialLocalsSize)
+      {
+         setLocalValueCount(block.initialLocalsSize);
+         if (oldUpValueCount != upValues.size())
+         {
+            resultingClosureLocation = block.initialLocalsSize;
+         }
+      }
+      block = block.previous;
+      return resultingClosureLocation;
+   }
+   
    public int addSymbol(Symbol.Type type, Identifier name, int index)
    {
       // TODO check that symbol exists?

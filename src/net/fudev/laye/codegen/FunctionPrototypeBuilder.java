@@ -40,20 +40,7 @@ import net.fudev.laye.vm.OpCode;
  */
 class FunctionPrototypeBuilder
 {
-   private final class Block
-   {
-      public final Block previous;
-      
-      public int initialLocalsSize;
-      public int startPosition;
-      
-      public Block(Block previous)
-      {
-         this.previous = previous;
-         startPosition = getCurrentPosition();
-         initialLocalsSize = getLocalCount();
-      }
-   }
+   
    
    private final FunctionPrototypeBuilder parent;
    
