@@ -87,7 +87,14 @@ public class FunctionCompiler implements AstVisitor
       {
          varSymbol = symbolTable.addSymbol(node.name);
       }
-      node.value.visit(this);
+      if (node.value != null)
+      {
+         node.value.visit(this);
+      }
+      else
+      {
+         builder.addOpLoadNull();
+      }
       switch (varSymbol.type)
       {
          case GLOBAL:
