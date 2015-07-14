@@ -24,8 +24,6 @@
 
 package net.fudev.laye.codegen;
 
-import java.util.Vector;
-
 import net.fudev.laye.debug.Console;
 import net.fudev.laye.parse.AstVisitor;
 import net.fudev.laye.parse.ast.*;
@@ -50,10 +48,10 @@ public class FunctionCompiler implements AstVisitor
       this.builder = builder;
    }
    
-   public FunctionPrototype getFunctionPrototype(Vector<Symbol> upValues)
+   public FunctionPrototype getFunctionPrototype()
    {
       builder.addOpLoadNull();
-      return builder.build(upValues);
+      return builder.build();
    }
    
    /*
@@ -84,7 +82,6 @@ public class FunctionCompiler implements AstVisitor
       {
          symbolTable.addSymbol(node.name);
       }
-      
       FunctionPrototypeBuilder newBuilder = new FunctionPrototypeBuilder(builder);
       for (Identifier name : node.params)
       {
@@ -94,14 +91,11 @@ public class FunctionCompiler implements AstVisitor
       {
          newBuilder.setIsVariadic();
       }
-      
       symbolTable.beginScope();
       FunctionCompiler newCompiler = new FunctionCompiler(console, symbolTable, newBuilder);
       node.body.visit(newCompiler);
-      FunctionPrototype newProto = newCompiler.getFunctionPrototype(
-            symbolTable.getCurrentUpValueSymbols());
       symbolTable.endScope();
-      
+      FunctionPrototype newProto = newCompiler.getFunctionPrototype();
       int newProtoIndex = builder.addNestedFunction(newProto);
       builder.addOpBuildClosure(newProtoIndex);
       Symbol fnSymbol = symbolTable.getSymbol(node.name);
@@ -112,7 +106,7 @@ public class FunctionCompiler implements AstVisitor
             builder.addOpStoreGlobal(fnSymbol.index);
             break;
          }
-         case LOCAL_VALUE:
+         case LOCAL:
          {
             builder.addOpStoreLocal(fnSymbol.index);
             break;
@@ -162,7 +156,7 @@ public class FunctionCompiler implements AstVisitor
             builder.addOpLoadGlobal(symbol.index);
             break;
          }
-         case LOCAL_VALUE:
+         case LOCAL:
          {
             builder.addOpLoadLocal(symbol.index);
             break;

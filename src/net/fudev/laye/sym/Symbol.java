@@ -33,9 +33,7 @@ public class Symbol implements Comparable<Symbol>
 {
    public static enum Type
    {
-      LOCAL_VALUE,
-      LOCAL_UP_VALUE,
-      UP_VALUE,
+      LOCAL,
       GLOBAL;
    }
    

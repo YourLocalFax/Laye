@@ -25,9 +25,9 @@ package net.fudev.laye.vm;
 
 import net.fudev.laye.GlobalState;
 import net.fudev.laye.codegen.FunctionPrototype;
+import net.fudev.laye.codegen.info.UpValueInfo;
 import net.fudev.laye.struct.Identifier;
 import net.fudev.laye.struct.Operator;
-import net.fudev.laye.sym.Symbol;
 import net.fudev.laye.type.LayeClosure;
 import net.fudev.laye.type.LayeException;
 import net.fudev.laye.type.LayeExternFunction;
@@ -296,22 +296,18 @@ public class LayeVM
             LayeClosure closure = new LayeClosure(callStack.getTop(), prototype);
             
             // Handle up-values
-            Symbol[] protoUpValues = prototype.upValues;
+            UpValueInfo[] protoUpValues = prototype.upValues;
             for (int i = 0; i < protoUpValues.length; i++)
             {
-               if (protoUpValues[i].type == Symbol.Type.LOCAL_UP_VALUE)
+               if (protoUpValues[i].type == UpValueInfo.Type.LOCAL)
                {
                   closure.capturedUpValues[i] = findUpValue(callStack.getTop().locals,
                         protoUpValues[i].index, currentUpValues);
                }
-               else if (protoUpValues[i].type == Symbol.Type.UP_VALUE)
+               else // if (protoUpValues[i].type == UpValueInfo.Type.UP_VALUE)
                {
                   closure.capturedUpValues[i] = callStack
                         .getTop().currentUpValues[protoUpValues[i].index];
-               }
-               else
-               {
-                  // TODO Wrong symbol type! error
                }
             }
             

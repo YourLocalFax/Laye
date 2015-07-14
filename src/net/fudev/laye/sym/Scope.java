@@ -33,10 +33,7 @@ import net.fudev.laye.struct.Identifier;
  */
 public class Scope
 {
-   private final Vector<Symbol> globalValues = new Vector<>();
-   private final Vector<Symbol> localValues = new Vector<>();
-   private final Vector<Symbol> upValues = new Vector<>();
-   
+   private final Vector<Symbol> symbols = new Vector<>();
    private final Vector<Scope> children = new Vector<>();
    
    public final Scope parent;
@@ -53,24 +50,7 @@ public class Scope
    
    public int addSymbol(Symbol.Type type, Identifier name, int index)
    {
-      // TODO check that symbol exists?
-      switch (type)
-      {
-         case GLOBAL:
-         {
-            globalValues.addElement(new Symbol(type, name, index));
-         } break;
-         case LOCAL_VALUE:
-         {
-            localValues.addElement(new Symbol(type, name, index));
-         } break;
-         case LOCAL_UP_VALUE:
-         case UP_VALUE:
-         {
-            upValues.addElement(new Symbol(type, name, index));
-         } break;
-         default:
-      }
+      symbols.addElement(new Symbol(type, name, index));
       return index;
    }
    
@@ -81,21 +61,7 @@ public class Scope
    
    public Symbol getSymbol(Identifier name)
    {
-      for (Symbol symbol : localValues)
-      {
-         if (symbol.name.equals(name))
-         {
-            return symbol;
-         }
-      }
-      for (Symbol symbol : upValues)
-      {
-         if (symbol.name.equals(name))
-         {
-            return symbol;
-         }
-      }
-      for (Symbol symbol : globalValues)
+      for (Symbol symbol : symbols)
       {
          if (symbol.name.equals(name))
          {
@@ -105,18 +71,8 @@ public class Scope
       return null;
    }
 
-   Vector<Symbol> getGlobalValueSymbols()
+   Vector<Symbol> getSymbols()
    {
-      return globalValues;
-   }
-
-   Vector<Symbol> getLocalValueSymbols()
-   {
-      return localValues;
-   }
-
-   Vector<Symbol> getUpValueSymbols()
-   {
-      return upValues;
+      return symbols;
    }
 }
