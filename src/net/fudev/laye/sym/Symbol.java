@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package net.fudev.laye.symbol;
+package net.fudev.laye.sym;
 
 import net.fudev.laye.struct.Identifier;
 

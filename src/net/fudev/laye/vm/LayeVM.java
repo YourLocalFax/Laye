@@ -27,7 +27,7 @@ import net.fudev.laye.GlobalState;
 import net.fudev.laye.codegen.FunctionPrototype;
 import net.fudev.laye.struct.Identifier;
 import net.fudev.laye.struct.Operator;
-import net.fudev.laye.symbol.Symbol;
+import net.fudev.laye.sym.Symbol;
 import net.fudev.laye.type.LayeClosure;
 import net.fudev.laye.type.LayeException;
 import net.fudev.laye.type.LayeExternFunction;

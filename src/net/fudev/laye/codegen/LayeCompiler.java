@@ -29,8 +29,8 @@ import java.util.Vector;
 import net.fudev.laye.debug.Console;
 import net.fudev.laye.parse.ast.Ast;
 import net.fudev.laye.struct.Identifier;
-import net.fudev.laye.symbol.Symbol;
-import net.fudev.laye.symbol.SymbolTable;
+import net.fudev.laye.sym.Symbol;
+import net.fudev.laye.sym.SymbolTable;
 
 /**
  * @author Sekai Kyoretsuna
@@ -63,6 +63,6 @@ public class LayeCompiler
    public FunctionPrototype compile(Ast ast)
    {
       ast.visit(fnCompiler);
-      return fnCompiler.getFunctionPrototype(null);
+      return fnCompiler.getFunctionPrototype();
    }
 }

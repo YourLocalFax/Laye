@@ -30,8 +30,8 @@ import net.fudev.laye.debug.Console;
 import net.fudev.laye.parse.AstVisitor;
 import net.fudev.laye.parse.ast.*;
 import net.fudev.laye.struct.Identifier;
-import net.fudev.laye.symbol.Symbol;
-import net.fudev.laye.symbol.SymbolTable;
+import net.fudev.laye.sym.Symbol;
+import net.fudev.laye.sym.SymbolTable;
 
 /**
  * @author Sekai Kyoretsuna
