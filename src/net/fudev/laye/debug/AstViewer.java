@@ -68,9 +68,9 @@ public class AstViewer implements AstVisitor
    public void accept(NodeVariableDef node)
    {
       print("Variable " + node.name);
-      tabs++;
+      tabs += 2;
       node.value.visit(this);
-      tabs--;
+      tabs -= 2;
    }
    
    @Override
