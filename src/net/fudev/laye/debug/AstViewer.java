@@ -111,6 +111,12 @@ public class AstViewer implements AstVisitor
    }
    
    @Override
+   public void accept(NodeIntLiteral node)
+   {
+      print(node.value);
+   }
+   
+   @Override
    public void accept(NodeStringLiteral node)
    {
       print("\"" + node.value + "\"");

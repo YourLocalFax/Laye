@@ -112,8 +112,12 @@ public class Parser
          NodeExpression current = parsePrimaryExpression();
          if (current == null)
          {
-            console.error("(Parser) comma expression encountered invalid expression.");
-            return null;
+            if (result.size() > 0)
+            {
+               console.error("(Parser) comma expression encountered invalid expression.");
+               return null;
+            }
+            return result;
          }
          result.addElement(current);
          if (!tokens.checkTokenType(Token.Type.COMMA))
@@ -138,6 +142,13 @@ public class Parser
          case OPEN_CURLY_BRACE:
          {
             return parseBlock();
+         }
+         case INT_LITERAL:
+         {
+            long value = ((Long) tokens.getToken().data).longValue();
+            // Lex int
+            tokens.getNextToken();
+            return new NodeIntLiteral(tokens.getLocation(), value);
          }
          case STRING_LITERAL:
          {

@@ -21,33 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package net.fudev.laye.parse.ast;
 
-package net.fudev.laye.parse;
-
-import net.fudev.laye.parse.ast.*;
+import net.fudev.laye.parse.AstVisitor;
+import net.fudev.laye.parse.Location;
 
 /**
  * @author Sekai Kyoretsuna
  */
-public interface AstVisitor
+public class NodeIntLiteral extends NodeExpression
 {
-   void accept(Ast node);
+   public long value;
    
-   void accept(NodeFunctionDef node);
+   /**
+    * @param location
+    */
+   public NodeIntLiteral(Location location, long value)
+   {
+      super(location);
+      this.value = value;
+   }
    
-   void accept(NodeInfixExpression node);
-
-   void accept(NodePostfixExpression node);
-
-   void accept(NodeIdentifier node);
-
-   void accept(NodeFunctionCall node);
-
-   void accept(NodeIntLiteral node);
-
-   void accept(NodeStringLiteral node);
-
-   void accept(NodeExternDecl node);
-
-   void accept(NodeBlock node);
+   @Override
+   public void visit(AstVisitor visitor)
+   {
+      visitor.accept(this);
+   }
 }

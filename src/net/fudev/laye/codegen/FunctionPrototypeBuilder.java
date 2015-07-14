@@ -28,6 +28,7 @@ import java.util.Vector;
 import net.fudev.laye.codegen.info.LocalValueInfo;
 import net.fudev.laye.codegen.info.UpValueInfo;
 import net.fudev.laye.struct.Identifier;
+import net.fudev.laye.type.LayeInt;
 import net.fudev.laye.type.LayeString;
 import net.fudev.laye.type.LayeValue;
 import net.fudev.laye.util.Util;
@@ -255,16 +256,27 @@ class FunctionPrototypeBuilder
       }
    }
    
-   public int addConstant(String value)
+   private int addConstant(LayeValue value)
    {
-      LayeValue strValue = new LayeString(value);
-      int index = constants.indexOf(strValue);
+      int index = constants.indexOf(value);
       if (index == -1)
       {
-         constants.add(strValue);
+         constants.add(value);
          return constants.size() - 1;
       }
       return index;
+   }
+   
+   public int addConstantInt(long value)
+   {
+      LayeValue intValue = LayeInt.valueOf(value);
+      return addConstant(intValue);
+   }
+   
+   public int addConstantString(String value)
+   {
+      LayeValue strValue = new LayeString(value);
+      return addConstant(strValue);
    }
    
    public int addNestedFunction(FunctionPrototype proto)

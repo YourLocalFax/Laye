@@ -53,23 +53,13 @@ public class FunctionCompiler implements AstVisitor
       builder.addOpLoadNull();
       return builder.build();
    }
-   
-   /*
-    * (non-Javadoc)
-    * 
-    * @see net.fudev.laye.parse.AstVisitor#accept(net.fudev.laye.parse.ast.Ast)
-    */
+
    @Override
    public void accept(Ast node)
    {
       node.forEach(child -> child.visit(this));
    }
    
-   /*
-    * (non-Javadoc)
-    * 
-    * @see net.fudev.laye.parse.AstVisitor#accept(net.fudev.laye.parse.ast.NodeFunctionDef)
-    */
    @Override
    public void accept(NodeFunctionDef node)
    {
@@ -113,32 +103,17 @@ public class FunctionCompiler implements AstVisitor
          }
       }
    }
-   
-   /*
-    * (non-Javadoc)
-    * 
-    * @see net.fudev.laye.parse.AstVisitor#accept(net.fudev.laye.parse.ast.NodeInfixExpression)
-    */
+
    @Override
    public void accept(NodeInfixExpression node)
    {
    }
    
-   /*
-    * (non-Javadoc)
-    * 
-    * @see net.fudev.laye.parse.AstVisitor#accept(net.fudev.laye.parse.ast.NodePostfixExpression)
-    */
    @Override
    public void accept(NodePostfixExpression node)
    {
    }
    
-   /*
-    * (non-Javadoc)
-    * 
-    * @see net.fudev.laye.parse.AstVisitor#accept(net.fudev.laye.parse.ast.NodeIdentifier)
-    */
    @Override
    public void accept(NodeIdentifier node)
    {
@@ -166,11 +141,6 @@ public class FunctionCompiler implements AstVisitor
       }
    }
    
-   /*
-    * (non-Javadoc)
-    * 
-    * @see net.fudev.laye.parse.AstVisitor#accept(net.fudev.laye.parse.ast.NodeFunctionCall)
-    */
    @Override
    public void accept(NodeFunctionCall node)
    {
@@ -179,23 +149,20 @@ public class FunctionCompiler implements AstVisitor
       builder.addOpInvoke(node.arguments.size());
    }
    
-   /*
-    * (non-Javadoc)
-    * 
-    * @see net.fudev.laye.parse.AstVisitor#accept(net.fudev.laye.parse.ast.NodeStringLiteral)
-    */
    @Override
-   public void accept(NodeStringLiteral node)
+   public void accept(NodeIntLiteral node)
    {
-      int constIndex = builder.addConstant(node.value);
+      int constIndex = builder.addConstantInt(node.value);
       builder.addOpLoadConst(constIndex);
    }
    
-   /*
-    * (non-Javadoc)
-    * 
-    * @see net.fudev.laye.parse.AstVisitor#accept(net.fudev.laye.parse.ast.NodeExternDecl)
-    */
+   @Override
+   public void accept(NodeStringLiteral node)
+   {
+      int constIndex = builder.addConstantString(node.value);
+      builder.addOpLoadConst(constIndex);
+   }
+   
    @Override
    public void accept(NodeExternDecl node)
    {
@@ -203,11 +170,6 @@ public class FunctionCompiler implements AstVisitor
       symbolTable.addSymbol(node.name);
    }
    
-   /*
-    * (non-Javadoc)
-    * 
-    * @see net.fudev.laye.parse.AstVisitor#accept(net.fudev.laye.parse.ast.NodeBlock)
-    */
    @Override
    public void accept(NodeBlock node)
    {

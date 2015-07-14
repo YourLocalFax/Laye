@@ -1,6 +1,12 @@
 extern Print
 
+fn MakeAdder(left)
+{
+
+}
+
 fn Main
 {
+   MakeAdder();
    Print("Hello, world!")
 }
