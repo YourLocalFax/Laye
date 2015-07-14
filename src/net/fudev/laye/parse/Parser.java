@@ -98,6 +98,10 @@ public class Parser
                }
                case Keyword.STR_FN:
                {
+                  if (tokens.peekToken().type == Token.Type.OPEN_BRACE)
+                  {
+                     return parseFunctionExpression();
+                  }
                   return parseFunctionDefinition();
                }
                case Keyword.STR_VAR:
@@ -148,6 +152,19 @@ public class Parser
    {
       switch (tokens.getToken().type)
       {
+         case KEYWORD:
+         {
+            switch (((Keyword) tokens.getToken().data).image)
+            {
+               case Keyword.STR_FN:
+               {
+                  return parseFunctionExpression();
+               }
+               default:
+                  consoleError("unexpected keyword " + tokens.getToken());
+                  return null;
+            }
+         }
          case OPEN_CURLY_BRACE:
          {
             return parseBlock();
@@ -263,6 +280,58 @@ public class Parser
       }
       
       return extern;
+   }
+   
+   // TODO check if these function things can be combined.
+   
+   private NodeFunctionExpr parseFunctionExpression()
+   {
+      NodeFunctionExpr fn = new NodeFunctionExpr(tokens.getLocation());
+      
+      // Lex 'fn'
+      tokens.getNextToken();
+      
+      // Lex '('
+      if (!tokens.expect(Token.Type.OPEN_BRACE))
+      {
+         console.error("'(' expected to start function parameter list.");
+         return null;
+      }
+      while (!tokens.checkTokenType(Token.Type.CLOSE_BRACE))
+      {
+         Identifier param = tokens.expectIdentifier();
+         if (param == null)
+         {
+            consoleError("no parameter name given.");
+            return null;
+         }
+         fn.addParameter(param);
+         // TODO check variadic param and such
+         if (!tokens.checkTokenType(Token.Type.COMMA))
+         {
+            break;
+         }
+         // Lex ','
+         tokens.getNextToken();
+      }
+      // Lex ')'
+      tokens.getNextToken();
+      
+      if (!tokens.checkTokenType(Token.Type.SEMI_COLON))
+      {
+         fn.body = parsePrimaryExpression();
+         if (fn.body == null)
+         {
+            consoleError("error parsing function body.");
+         }
+      }
+      else
+      {
+         // Lex ';'
+         tokens.getNextToken();
+      }
+      
+      return fn;
    }
    
    private NodeFunctionDef parseFunctionDefinition()

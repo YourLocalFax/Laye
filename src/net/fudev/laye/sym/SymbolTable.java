@@ -34,26 +34,68 @@ import net.fudev.laye.struct.Identifier;
  */
 public class SymbolTable
 {
+   private static final class LocalScope
+   {
+      public final LocalScope parentScope;
+      // public int nextLocal = 0;
+      
+      public LocalScope(LocalScope parentScope)
+      {
+         this.parentScope = parentScope;
+      }
+   }
+   
    private final Scope globalScope = new Scope();
    private Scope currentScope;
+   private Scope lastScope;
+   private LocalScope currentLocalScope;
    
    private int nextGlobalIndex = 0;
    private int nextLocalIndex = 0;
+   
+   // private Stack<Integer> localIndices = new Stack<Integer>();
    
    public SymbolTable()
    {
       currentScope = globalScope;
    }
    
-   public void beginScope()
+   public Scope nextScope()
    {
-      Scope newScope = new Scope(currentScope);
-      currentScope.addScope(newScope);
-      currentScope = newScope;
+      if (currentScope == null)
+      {
+         currentScope = globalScope;
+      }
+      currentScope = currentScope.nextScope;
+      return currentScope;
    }
    
-   public void endScope()
+   public void beginScope(boolean isLocalScope)
    {
+      if (isLocalScope)
+      {
+         currentLocalScope = new LocalScope(currentLocalScope);
+      }
+      Scope newScope = new Scope(currentScope);
+      if (lastScope != null)
+      {
+         lastScope.nextScope = newScope;
+      }
+      else
+      {
+         globalScope.nextScope = newScope;
+      }
+      currentScope.addScope(newScope);
+      currentScope = newScope;
+      lastScope = newScope;
+   }
+   
+   public void endScope(boolean isLocalScope)
+   {
+      if (isLocalScope)
+      {
+         currentLocalScope = currentLocalScope.parentScope;
+      }
       currentScope = currentScope.parent;
       if (currentScope == globalScope)
       {
@@ -63,13 +105,13 @@ public class SymbolTable
    
    public Symbol addSymbol(Identifier name)
    {
-      if (currentScope == globalScope)
+      if (currentScope.parent != null)
       {
-         currentScope.addSymbol(Symbol.Type.GLOBAL, name, nextGlobalIndex++);
+         currentScope.addSymbol(Symbol.Type.LOCAL, name, nextLocalIndex++);
       }
       else
       {
-         currentScope.addSymbol(Symbol.Type.LOCAL, name, nextLocalIndex++);
+         currentScope.addSymbol(Symbol.Type.GLOBAL, name, nextGlobalIndex++);
       }
       return getSymbol(name);
    }

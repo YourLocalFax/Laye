@@ -22,40 +22,42 @@
  * THE SOFTWARE.
  */
 
-package net.fudev.laye.sym;
+package net.fudev.laye.parse.ast;
 
+import java.util.Vector;
+
+import net.fudev.laye.parse.AstVisitor;
+import net.fudev.laye.parse.Location;
 import net.fudev.laye.struct.Identifier;
 
 /**
  * @author Sekai Kyoretsuna
  */
-public class Symbol implements Comparable<Symbol>
+public class NodeFunctionExpr extends NodeExpression
 {
-   public static enum Type
+   public Vector<Identifier> params = new Vector<>();
+   public boolean isVariadic = false;
+   public NodeExpression body = null;
+   
+   /**
+    * @param location
+    */
+   public NodeFunctionExpr(Location location)
    {
-      LOCAL,
-      LOCAL_UP,
-      UP,
-      GLOBAL;
+      super(location);
    }
    
-   public final Type type;
-   public final Identifier name;
-   public final int index;
-
-   public Symbol(Type type, Identifier name, int index)
+   public void addParameter(Identifier name)
    {
-      this.type = type;
-      this.name = name;
-      this.index = index;
+      params.addElement(name);
    }
-
+   
    /* (non-Javadoc)
-    * @see java.lang.Comparable#compareTo(java.lang.Object)
+    * @see net.fudev.laye.ast.AstNode#visit(net.fudev.laye.parse.AstVisitor)
     */
    @Override
-   public int compareTo(Symbol o)
+   public void visit(AstVisitor visitor)
    {
-      return index - o.index;
+      visitor.accept(this);
    }
 }

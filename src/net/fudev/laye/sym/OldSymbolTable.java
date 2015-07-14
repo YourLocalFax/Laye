@@ -24,6 +24,7 @@
 
 package net.fudev.laye.sym;
 
+import java.util.Collections;
 import java.util.Vector;
 
 import net.fudev.laye.struct.Identifier;
@@ -31,50 +32,72 @@ import net.fudev.laye.struct.Identifier;
 /**
  * @author Sekai Kyoretsuna
  */
-public class Scope
+public class OldSymbolTable
 {
-   private final Vector<Symbol> symbols = new Vector<>();
-   private final Vector<Scope> children = new Vector<>();
+   private final Scope globalScope = new Scope();
+   private Scope currentScope;
    
-   public final Scope parent;
+   private int nextGlobalIndex = 0;
+   private int nextLocalIndex = 0;
    
-   Scope nextScope = null;
-   
-   public Scope()
+   public OldSymbolTable()
    {
-      parent = null;
+      currentScope = globalScope;
    }
    
-   public Scope(Scope parent)
+   public void beginScope()
    {
-      this.parent = parent;
+      Scope newScope = new Scope(currentScope);
+      currentScope.addScope(newScope);
+      currentScope = newScope;
    }
    
-   public int addSymbol(Symbol.Type type, Identifier name, int index)
+   public void endScope()
    {
-      symbols.addElement(new Symbol(type, name, index));
-      return index;
+      currentScope = currentScope.parent;
+      if (currentScope == globalScope)
+      {
+         nextLocalIndex = 0;
+      }
    }
    
-   public void addScope(Scope child)
+   public Symbol addSymbol(Identifier name)
    {
-      children.addElement(child);
+      if (currentScope == globalScope)
+      {
+         currentScope.addSymbol(Symbol.Type.GLOBAL, name, nextGlobalIndex++);
+      }
+      else
+      {
+         currentScope.addSymbol(Symbol.Type.LOCAL, name, nextLocalIndex++);
+      }
+      return getSymbol(name);
+   }
+   
+   public boolean isSymbolDefined(Identifier name)
+   {
+      return getSymbol(name) != null;
    }
    
    public Symbol getSymbol(Identifier name)
    {
-      for (Symbol symbol : symbols)
+      Scope scope = currentScope;
+      while (scope != null)
       {
-         if (symbol.name.equals(name))
+         Symbol symbol = scope.getSymbol(name);
+         if (symbol != null)
          {
             return symbol;
          }
+         scope = scope.parent;
       }
       return null;
    }
-
-   Vector<Symbol> getSymbols()
+   
+   public Vector<Symbol> getGlobalSymbols()
    {
-      return symbols;
+      Vector<Symbol> result = new Vector<>(globalScope.getSymbols());
+      Collections.sort(result);
+      return result;
    }
 }

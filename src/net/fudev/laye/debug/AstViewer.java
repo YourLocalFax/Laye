@@ -74,6 +74,20 @@ public class AstViewer implements AstVisitor
    }
    
    @Override
+   public void accept(NodeFunctionExpr node)
+   {
+      print("FunctionExpression");
+      tabs += 2;
+      node.params.forEach((param) -> print(param.image));
+      tabs--;
+      if (node.body != null)
+      {
+         node.body.visit(this);
+      }
+      tabs--;
+   }
+   
+   @Override
    public void accept(NodeFunctionDef node)
    {
       print("Function " + node.name);

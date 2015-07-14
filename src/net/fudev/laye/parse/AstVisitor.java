@@ -34,6 +34,8 @@ public interface AstVisitor
    void accept(Ast node);
 
    void accept(NodeVariableDef node);
+
+   void accept(NodeFunctionExpr node);
    
    void accept(NodeFunctionDef node);
    

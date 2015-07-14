@@ -25,8 +25,6 @@ package net.fudev.laye.codegen;
 
 import java.util.Arrays;
 
-import net.fudev.laye.codegen.info.UpValueInfo;
-
 /**
  * @author Sekai Kyoretsuna
  */
@@ -41,13 +39,11 @@ public final class FunctionPrototype
    public final int maxStackCount;
    
    public final FunctionPrototype[] nestedFunctions;
-   public final UpValueInfo[] upValues;
-   
    public final Object[] constants;
    
    FunctionPrototype(int[] body, int numParameters, boolean variadic, int localCount,
-         int maxStackCount, FunctionPrototype[] nestedFunctions, UpValueInfo[] upValues,
-         Object[] constants)
+                     int maxStackCount, FunctionPrototype[] nestedFunctions,
+                     Object[] constants)
    {
       this.body = Arrays.copyOf(body, body.length);
       this.numParameters = numParameters;
@@ -55,7 +51,6 @@ public final class FunctionPrototype
       this.localCount = localCount;
       this.maxStackCount = maxStackCount;
       this.nestedFunctions = nestedFunctions;
-      this.upValues = upValues;
       this.constants = constants;
    }
 }

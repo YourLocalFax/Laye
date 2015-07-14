@@ -30,7 +30,7 @@ import net.fudev.laye.debug.Console;
 import net.fudev.laye.parse.ast.Ast;
 import net.fudev.laye.struct.Identifier;
 import net.fudev.laye.sym.Symbol;
-import net.fudev.laye.sym.SymbolTable;
+import net.fudev.laye.sym.OldSymbolTable;
 
 /**
  * @author Sekai Kyoretsuna
@@ -38,15 +38,15 @@ import net.fudev.laye.sym.SymbolTable;
 public class LayeCompiler
 {
    private final Console console;
-   private final SymbolTable symbolTable;
+   private final OldSymbolTable symbolTable;
    private final FunctionCompiler fnCompiler;
    
    public LayeCompiler(Console console)
    {
       this.console = console;
-      symbolTable = new SymbolTable();
+      symbolTable = new OldSymbolTable();
       fnCompiler = new FunctionCompiler(this.console, symbolTable,
-            new FunctionPrototypeBuilder(null));
+            new FunctionPrototypeBuilder());
    }
    
    public Vector<Identifier> getGlobalSymbolNames()

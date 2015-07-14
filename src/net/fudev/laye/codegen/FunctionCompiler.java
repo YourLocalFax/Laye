@@ -30,7 +30,7 @@ import net.fudev.laye.parse.Location;
 import net.fudev.laye.parse.ast.*;
 import net.fudev.laye.struct.Identifier;
 import net.fudev.laye.sym.Symbol;
-import net.fudev.laye.sym.SymbolTable;
+import net.fudev.laye.sym.OldSymbolTable;
 
 /**
  * @author Sekai Kyoretsuna
@@ -38,10 +38,10 @@ import net.fudev.laye.sym.SymbolTable;
 public class FunctionCompiler implements AstVisitor
 {
    private final Console console;
-   private final SymbolTable symbolTable;
+   private final OldSymbolTable symbolTable;
    private final FunctionPrototypeBuilder builder;
    
-   public FunctionCompiler(Console console, SymbolTable symbolTable,
+   public FunctionCompiler(Console console, OldSymbolTable symbolTable,
          FunctionPrototypeBuilder builder)
    {
       this.console = console;
@@ -103,10 +103,37 @@ public class FunctionCompiler implements AstVisitor
          } break;
          case LOCAL:
          {
-            builder.addLocal(node.name);
             builder.addOpStoreLocal(varSymbol.index);
          } break;
       }
+   }
+   
+   // TODO these will get compressed soon, NodeFunctionDef will contain a NodeFunctionExpr
+   
+   @Override
+   public void accept(NodeFunctionExpr node)
+   {
+      symbolTable.beginScope();
+      FunctionPrototypeBuilder newBuilder = new FunctionPrototypeBuilder();
+      for (Identifier name : node.params)
+      {
+         symbolTable.addSymbol(name);
+         // TODO make this just set the size rather than call addParameter();
+         newBuilder.addParameter();
+      }
+      if (node.isVariadic)
+      {
+         newBuilder.setIsVariadic();
+      }
+      FunctionCompiler newCompiler = new FunctionCompiler(console, symbolTable, newBuilder);
+      if (node.body != null)
+      {
+         node.body.visit(newCompiler);
+      }
+      symbolTable.endScope();
+      FunctionPrototype newProto = newCompiler.getFunctionPrototype();
+      int newProtoIndex = builder.addNestedFunction(newProto);
+      builder.addOpBuildClosure(newProtoIndex);
    }
    
    @Override
@@ -124,11 +151,11 @@ public class FunctionCompiler implements AstVisitor
          fnSymbol = symbolTable.addSymbol(node.name);
       }
       symbolTable.beginScope();
-      FunctionPrototypeBuilder newBuilder = new FunctionPrototypeBuilder(builder);
+      FunctionPrototypeBuilder newBuilder = new FunctionPrototypeBuilder();
       for (Identifier name : node.params)
       {
          symbolTable.addSymbol(name);
-         newBuilder.addParameter(name);
+         newBuilder.addParameter();
       }
       if (node.isVariadic)
       {
@@ -151,7 +178,6 @@ public class FunctionCompiler implements AstVisitor
          } break;
          case LOCAL:
          {
-            builder.addLocal(node.name);
             builder.addOpStoreLocal(fnSymbol.index);
          } break;
       }
@@ -223,8 +249,6 @@ public class FunctionCompiler implements AstVisitor
    @Override
    public void accept(NodeBlock node)
    {
-      builder.beginBlock();
       node.body.forEach(n -> n.visit(this));
-      builder.endBlock();
    }
 }

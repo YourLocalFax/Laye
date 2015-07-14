@@ -23,11 +23,8 @@
  */
 package net.fudev.laye.vm;
 
-import java.util.Arrays;
-
 import net.fudev.laye.GlobalState;
 import net.fudev.laye.codegen.FunctionPrototype;
-import net.fudev.laye.codegen.info.UpValueInfo;
 import net.fudev.laye.struct.Identifier;
 import net.fudev.laye.struct.Operator;
 import net.fudev.laye.type.LayeClosure;
@@ -287,23 +284,6 @@ public class LayeVM
          {
             FunctionPrototype prototype = callStack.getTop().closure.prototype.nestedFunctions[a];
             LayeClosure closure = new LayeClosure(callStack.getTop(), prototype);
-            
-            // Handle up-values
-            UpValueInfo[] protoUpValues = prototype.upValues;
-            for (int i = 0; i < protoUpValues.length; i++)
-            {
-               if (protoUpValues[i].type == UpValueInfo.Type.LOCAL)
-               {
-                  closure.capturedUpValues[i] = findUpValue(callStack.getTop().locals,
-                        protoUpValues[i].index, currentUpValues);
-               }
-               else // if (protoUpValues[i].type == UpValueInfo.Type.UP_VALUE)
-               {
-                  closure.capturedUpValues[i] = callStack
-                        .getTop().currentUpValues[protoUpValues[i].index];
-               }
-            }
-            
             callStack.push(closure);
          } return;
             

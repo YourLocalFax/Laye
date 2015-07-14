@@ -1,9 +1,9 @@
 extern Print
 
-fn MakeAdder(left) left
+fn MakeAdder(left) fn(right) right
 
 fn Main()
 {
    var Add5 = MakeAdder(5)
-   Print(Add5)
+   Print(Add5(10))
 }
