@@ -166,7 +166,7 @@ public class Lexer
             default:
                if (Character.isDigit(currentChar))
                {
-                  // TODO lex number literals
+                  return lexNumericToken();
                }
                return lexOtherTokens();
          }
@@ -247,6 +247,27 @@ public class Lexer
             console.error("escape character " + currentChar + " not recognized.");
             return '\u0000';
       }
+   }
+   
+   private Token lexNumericToken()
+   {
+      final int startColumn = column;
+      // TODO this only handles decimal integers. Needs binary, octal, hex, fp, and sci-note.
+      // TODO maybe also add unicode? 0uXXXX...?
+      char lastChar;
+      do
+      {
+         lastChar = currentChar;
+         putChar();
+      }
+      while (Character.isDigit(currentChar) || currentChar == '_');
+      if (lastChar == '_')
+      {
+         console.error("(Parser) line " + line + " (column " + column + 
+               "): numbers cannot end with '_'.");
+      }
+      String result = getTempString();
+      return new Token(Token.Type.INT_LITERAL, Long.parseLong(result), line, startColumn);
    }
    
    private Token lexOtherTokens()

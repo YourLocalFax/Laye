@@ -7,6 +7,6 @@ fn MakeAdder(left)
 
 fn Main
 {
-   MakeAdder();
+   MakeAdder(5);
    Print("Hello, world!")
 }
