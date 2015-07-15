@@ -50,8 +50,8 @@ public class Parser
    
    private void consoleError(String message)
    {
-      Token lastToken = tokens.getToken();
-      console.error("(Parser) line " + lastToken.line + " (column " + lastToken.column + "): " + message);
+      Token token = tokens.getToken();
+      console.error("Parser", new Location(token.line, token.column, tokens.file), message);
    }
    
    /**
@@ -294,7 +294,7 @@ public class Parser
       // Lex '('
       if (!tokens.expect(Token.Type.OPEN_BRACE))
       {
-         console.error("'(' expected to start function parameter list.");
+         consoleError("'(' expected to start function parameter list.");
          return null;
       }
       while (!tokens.checkTokenType(Token.Type.CLOSE_BRACE))
@@ -351,7 +351,7 @@ public class Parser
       // Lex '('
       if (!tokens.expect(Token.Type.OPEN_BRACE))
       {
-         console.error("'(' expected to start function parameter list.");
+         consoleError("'(' expected to start function parameter list.");
          return null;
       }
       while (!tokens.checkTokenType(Token.Type.CLOSE_BRACE))

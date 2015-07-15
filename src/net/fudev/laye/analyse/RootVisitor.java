@@ -22,144 +22,110 @@
  * THE SOFTWARE.
  */
 
-package net.fudev.laye.debug;
+package net.fudev.laye.analyse;
 
-import java.util.Objects;
-
+import net.fudev.laye.debug.Console;
 import net.fudev.laye.parse.AstVisitor;
 import net.fudev.laye.parse.ast.*;
+import net.fudev.laye.struct.Identifier;
+import net.fudev.laye.sym.SymbolTable;
 
 /**
  * @author Sekai Kyoretsuna
  */
-public class AstViewer implements AstVisitor
+public class RootVisitor implements AstVisitor
 {
-   private final Console console;
+   private Console console;
+   private SymbolTable symbolTable;
    
-   private int tabs = 0;
-   
-   public AstViewer(Console console)
+   public RootVisitor(Console console, SymbolTable symbolTable)
    {
       this.console = console;
-   }
-   
-   private void print(Object object)
-   {
-      print(Objects.toString(object));
-   }
-   
-   private void print(String message)
-   {
-      StringBuilder output = new StringBuilder();
-      for (int i = 0; i < tabs; i++)
-      {
-         output.append("   ");
-      }
-      console.info("Console", null, output.append(message).toString());
+      this.symbolTable = symbolTable;
    }
    
    @Override
    public void accept(Ast node)
    {
-      node.forEach((child) -> child.visit(this));
+      node.forEach(child -> child.visit(this));
    }
    
    @Override
    public void accept(NodeVariableDef node)
    {
-      print("Variable " + node.name);
-      tabs += 2;
-      node.value.visit(this);
-      tabs -= 2;
+      symbolTable.addSymbol(node.name);
    }
    
    @Override
    public void accept(NodeFunctionExpr node)
    {
-      print("FunctionExpression");
-      tabs += 2;
-      node.params.forEach((param) -> print(param.image));
-      tabs--;
-      if (node.body != null)
-      {
-         node.body.visit(this);
-      }
-      tabs--;
+      console.error("RootVisitor", node.location, "Expression not allowed outside function body.");
+      FunctionVisitor visitor = new FunctionVisitor(console, symbolTable);
+      node.visit(visitor);
    }
    
    @Override
    public void accept(NodeFunctionDef node)
    {
-      print("Function " + node.name);
-      tabs += 2;
-      node.params.forEach((param) -> print(param.image));
-      tabs--;
-      if (node.body != null)
+      symbolTable.addSymbol(node.name);
+
+      FunctionVisitor visitor = new FunctionVisitor(console, symbolTable);
+      symbolTable.beginScope(true);
+
+      for (Identifier param : node.params)
       {
-         node.body.visit(this);
+         symbolTable.addSymbol(param);
       }
-      tabs--;
+      
+      node.body.visit(visitor);
+      symbolTable.endScope(true);
    }
    
    @Override
    public void accept(NodeInfixExpression node)
    {
-      node.left.visit(this);
-      tabs += 2;
-      print(node.operator);
-      node.right.visit(this);
-      tabs -= 2;
+      console.error("RootVisitor", node.location, "Expression not allowed outside function body.");
    }
    
    @Override
    public void accept(NodePostfixExpression node)
    {
-      node.left.visit(this);
-      tabs += 2;
-      print(node.operator);
-      tabs -= 2;
+      console.error("RootVisitor", node.location, "Expression not allowed outside function body.");
    }
    
    @Override
-   public void accept(NodeIdentifier nodeIdentifier)
+   public void accept(NodeIdentifier node)
    {
-      print(nodeIdentifier.name);
+      console.error("RootVisitor", node.location, "Expression not allowed outside function body.");
    }
    
    @Override
    public void accept(NodeFunctionCall node)
    {
-      // print("Function Call:");
-      node.target.visit(this);
-      tabs += 2;
-      node.arguments.forEach((child) -> child.visit(this));
-      tabs -= 2;
+      console.error("RootVisitor", node.location, "Expression not allowed outside function body.");
    }
    
    @Override
    public void accept(NodeIntLiteral node)
    {
-      print(node.value);
+      console.error("RootVisitor", node.location, "Expression not allowed outside function body.");
    }
    
    @Override
    public void accept(NodeStringLiteral node)
    {
-      print("\"" + node.value + "\"");
+      console.error("RootVisitor", node.location, "Expression not allowed outside function body.");
    }
    
    @Override
    public void accept(NodeExternDecl node)
    {
-      print("Extern " + node.name);
+      symbolTable.addSymbol(node.name);
    }
    
    @Override
    public void accept(NodeBlock node)
    {
-      for (AstNode n : node.body)
-      {
-         n.visit(this);
-      }
+      console.error("RootVisitor", node.location, "Expression not allowed outside function body.");
    }
 }

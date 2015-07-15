@@ -54,7 +54,7 @@ class FunctionPrototypeBuilder
    
    private final Vector<Integer> body = new Vector<>();
    
-   private int numParameters = 0;
+   public int numParameters = 0;
    private boolean variadic = false;
    
    private int localCount = 0;
@@ -125,11 +125,6 @@ class FunctionPrototypeBuilder
 //      }
 //      currentBlock = currentBlock.previous;
 //   }
-   
-   public void addParameter()
-   {
-      numParameters++;
-   }
    
    private int addConstant(LayeValue value)
    {

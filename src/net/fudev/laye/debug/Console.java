@@ -24,59 +24,65 @@
 
 package net.fudev.laye.debug;
 
-import java.io.InputStream;
 import java.util.Objects;
+
+import net.fudev.laye.parse.Location;
 
 /**
  * @author Sekai Kyoretsuna
  */
 public class Console
 {
-   public static final ConsoleOutput DEFAULT_OUTPUT = (level, message) ->
+   public static final ConsoleOutput DEFAULT_OUTPUT = (level, name, location, message) ->
    {
+      String header = name != null ? "(" + name + ") " : "";
+      if (location != null)
+      {
+         header = header + "line " + location.line +
+               " (column " + location.column + "): ";
+      }
       switch (level)
       {
          case INFO:
-            System.out.println("[INFO] " + message);
+            System.out.println("[INFO] " + header + message);
             break;
          case WARNING:
-            System.out.println("[WARNING] " + message);
+            System.out.println("[WARNING] " + header + message);
             break;
          case ERROR:
-            System.err.println("[ERROR] " + message);
+            System.err.println("[ERROR] " + header + message);
             break;
       }
    };
    
    private ConsoleOutput output = DEFAULT_OUTPUT;
-   private InputStream input = System.in;
    
    public Console()
    {
    }
    
-   public void write(OutputLevel level, String message)
+   public void write(OutputLevel level, String name, Location location, String message)
    {
-      output.write(level, message);
+      output.write(level, name, location, message);
    }
    
-   public void info(Object object)
+   public void info(String name, Location location, Object object)
    {
-      info(Objects.toString(object));
+      info(name, location, Objects.toString(object));
    }
    
-   public void info(String message)
+   public void info(String name, Location location, String message)
    {
-      write(OutputLevel.INFO, message);
+      write(OutputLevel.INFO, name, location, message);
    }
    
-   public void warning(String message)
+   public void warning(String name, Location location, String message)
    {
-      write(OutputLevel.WARNING, message);
+      write(OutputLevel.WARNING, name, location, message);
    }
    
-   public void error(String message)
+   public void error(String name, Location location, String message)
    {
-      write(OutputLevel.ERROR, message);
+      write(OutputLevel.ERROR, name, location, message);
    }
 }

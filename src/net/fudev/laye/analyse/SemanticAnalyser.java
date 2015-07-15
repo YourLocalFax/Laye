@@ -22,44 +22,28 @@
  * THE SOFTWARE.
  */
 
-package net.fudev.laye.codegen;
-
-import java.util.Vector;
+package net.fudev.laye.analyse;
 
 import net.fudev.laye.debug.Console;
 import net.fudev.laye.parse.ast.Ast;
-import net.fudev.laye.struct.Identifier;
-import net.fudev.laye.sym.Symbol;
 import net.fudev.laye.sym.SymbolTable;
 
 /**
  * @author Sekai Kyoretsuna
  */
-public class LayeCompiler
+public class SemanticAnalyser
 {
-   private final SymbolTable symbolTable;
-   private final FunctionCompiler fnCompiler;
+   private Console console;
    
-   public LayeCompiler(Console console, SymbolTable symbolTable)
+   public SemanticAnalyser(Console console)
    {
-      this.symbolTable = symbolTable;
-      fnCompiler = new FunctionCompiler(console, symbolTable, new FunctionPrototypeBuilder());
    }
    
-   public Vector<Identifier> getGlobalSymbolNames()
+   public SymbolTable analyse(Ast ast)
    {
-      Vector<Symbol> symbols = symbolTable.getGlobalSymbols();
-      Vector<Identifier> result = new Vector<Identifier>(symbols.size());
-      for (Symbol symbol : symbols)
-      {
-         result.addElement(symbol.name);
-      }
+      SymbolTable result = new SymbolTable();
+      RootVisitor visitor = new RootVisitor(console, result);
+      ast.visit(visitor);
       return result;
-   }
-   
-   public FunctionPrototype compile(Ast ast)
-   {
-      ast.visit(fnCompiler);
-      return fnCompiler.getFunctionPrototype();
    }
 }

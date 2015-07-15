@@ -29,6 +29,7 @@ import java.io.InputStream;
 
 import net.fudev.laye.LayeFile;
 import net.fudev.laye.debug.Console;
+import net.fudev.laye.parse.Location;
 import net.fudev.laye.struct.Identifier;
 import net.fudev.laye.struct.Keyword;
 
@@ -40,6 +41,7 @@ public class Lexer
    private final Console console;
    
    private InputStream input = null;
+   private LayeFile file = null;
    
    private StringBuilder builder = new StringBuilder();
    private char currentChar = '\u0000';
@@ -54,6 +56,7 @@ public class Lexer
    
    public TokenStream getTokens(LayeFile file) throws IOException
    {
+      this.file = file;
       input = file.read();
       readChar();
       TokenStream result = new TokenStream(file, console);
@@ -219,7 +222,7 @@ public class Lexer
             }
             if (idx > 4)
             {
-               console.error("at most 4 digits are expected when defining a unicode char, " + idx
+               console.error("Lexer", new Location(line, column, file), "at most 4 digits are expected when defining a unicode char, " + idx
                      + " given.");
                return '\u0000';
             }
@@ -247,7 +250,7 @@ public class Lexer
             readChar();
             return '\\';
          default:
-            console.error("escape character " + currentChar + " not recognized.");
+            console.error("Lexer", new Location(line, column, file), "escape character " + currentChar + " not recognized.");
             return '\u0000';
       }
    }
@@ -266,8 +269,7 @@ public class Lexer
       while (Character.isDigit(currentChar) || currentChar == '_');
       if (lastChar == '_')
       {
-         console.error("(Parser) line " + line + " (column " + column + 
-               "): numbers cannot end with '_'.");
+         console.error("Lexer", new Location(line, column, file), "numbers cannot end with '_'.");
       }
       String result = getTempString();
       return new Token(Token.Type.INT_LITERAL, Long.parseLong(result), line, startColumn);
@@ -278,7 +280,7 @@ public class Lexer
       final int startColumn = column;
       if (!Identifier.isValidIdentifierStart(currentChar))
       {
-         console.error("(Lexer) token " + currentChar + " is not a valid identifier start.");
+         console.error("Lexer", new Location(line, column, file), "token " + currentChar + " is not a valid identifier start.");
          return null;
       }
       do

@@ -24,10 +24,12 @@
 
 package net.fudev.laye.debug;
 
+import net.fudev.laye.parse.Location;
+
 /**
  * @author Sekai Kyoretsuna
  */
 public interface ConsoleOutput
 {
-   void write(OutputLevel level, String message);
+   void write(OutputLevel level, String name, Location location, String message);
 }

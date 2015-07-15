@@ -34,8 +34,6 @@ public class Symbol implements Comparable<Symbol>
    public static enum Type
    {
       LOCAL,
-      LOCAL_UP,
-      UP,
       GLOBAL;
    }
    
@@ -50,12 +48,15 @@ public class Symbol implements Comparable<Symbol>
       this.index = index;
    }
 
-   /* (non-Javadoc)
-    * @see java.lang.Comparable#compareTo(java.lang.Object)
-    */
    @Override
    public int compareTo(Symbol o)
    {
       return index - o.index;
+   }
+   
+   @Override
+   public String toString()
+   {
+      return name.toString();
    }
 }

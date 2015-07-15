@@ -91,7 +91,7 @@ public final class TokenStream
    {
       if (position + depth >= tokens.size())
       {
-         console.warning("(TokenStream) could not peek token (depth " + depth + ").");
+         console.warning("TokenStream", null, "could not peek token (depth " + depth + ").");
          return null;
       }
       return tokens.elementAt(position + depth);
@@ -107,8 +107,8 @@ public final class TokenStream
       Token token = getToken();
       if (token.type != type)
       {
-         console.error("(TokenStream) line " + token.line + " (column " + token.column + "): "
-               + type + " expected, got " + token.type + ".");
+         console.error("TokenStream", new Location(token.line, token.column, file),
+               type + " expected, got " + token.type + ".");
          return false;
       }
       getNextToken();

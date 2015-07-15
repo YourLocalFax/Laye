@@ -27,15 +27,18 @@ package net.fudev.laye;
 import java.io.IOException;
 import java.util.Vector;
 
+import net.fudev.laye.analyse.SemanticAnalyser;
 import net.fudev.laye.codegen.FunctionPrototype;
 import net.fudev.laye.codegen.LayeCompiler;
 import net.fudev.laye.debug.AstViewer;
 import net.fudev.laye.debug.Console;
 import net.fudev.laye.lex.Lexer;
 import net.fudev.laye.lex.TokenStream;
+import net.fudev.laye.parse.Location;
 import net.fudev.laye.parse.Parser;
 import net.fudev.laye.parse.ast.Ast;
 import net.fudev.laye.struct.Identifier;
+import net.fudev.laye.sym.SymbolTable;
 import net.fudev.laye.type.LayeClosure;
 import net.fudev.laye.vm.LayeVM;
 
@@ -53,19 +56,35 @@ public final class LayeTest
       Lexer lexer = new Lexer(console);
       TokenStream tokens = lexer.getTokens(source);
       
+      if (tokens == null)
+      {
+         console.error("", new Location(0, 0, source), "Lex failure.");
+         return;
+      }
+      
       Parser parser = new Parser(console);
       Ast ast = parser.parse(tokens);
       
       if (ast == null)
       {
-         console.error("Parse failure.");
+         console.error("", new Location(0, 0, source), "Parse failure.");
          return;
       }
       
+      SemanticAnalyser analyser = new SemanticAnalyser(console);
+      SymbolTable symbolTable = analyser.analyse(ast);
+      
+      if (symbolTable == null)
+      {
+         console.error("", new Location(0, 0, source), "Analyse failure.");
+         return;
+      }
+      
+      // View our thing.
       AstViewer viewer = new AstViewer(console);
       viewer.accept(ast);
       
-      LayeCompiler compiler = new LayeCompiler(console);
+      LayeCompiler compiler = new LayeCompiler(console, symbolTable);
       FunctionPrototype fnProto = compiler.compile(ast);
       
       LayeClosure rootClosure = new LayeClosure(null, fnProto);

@@ -30,7 +30,7 @@ import net.fudev.laye.parse.Location;
 import net.fudev.laye.parse.ast.*;
 import net.fudev.laye.struct.Identifier;
 import net.fudev.laye.sym.Symbol;
-import net.fudev.laye.sym.OldSymbolTable;
+import net.fudev.laye.sym.SymbolTable;
 
 /**
  * @author Sekai Kyoretsuna
@@ -38,10 +38,10 @@ import net.fudev.laye.sym.OldSymbolTable;
 public class FunctionCompiler implements AstVisitor
 {
    private final Console console;
-   private final OldSymbolTable symbolTable;
+   private final SymbolTable symbolTable;
    private final FunctionPrototypeBuilder builder;
    
-   public FunctionCompiler(Console console, OldSymbolTable symbolTable,
+   public FunctionCompiler(Console console, SymbolTable symbolTable,
          FunctionPrototypeBuilder builder)
    {
       this.console = console;
@@ -55,16 +55,9 @@ public class FunctionCompiler implements AstVisitor
       return builder.build();
    }
    
-   private void consoleWarning(Location location, String message)
-   {
-      console.warning("(FunctionCompiler) line " + location.line + " (column " +
-                      location.column +"): " + message);
-   }
-   
    private void consoleError(Location location, String message)
    {
-      console.error("(FunctionCompiler) line " + location.line + " (column " +
-                    location.column +"): " + message);
+      console.error("FunctionCompiler", location, message);
    }
 
    @Override
@@ -76,17 +69,6 @@ public class FunctionCompiler implements AstVisitor
    @Override
    public void accept(NodeVariableDef node)
    {
-      Symbol varSymbol;
-      if (symbolTable.isSymbolDefined(node.name))
-      {
-         // TODO make it so this can never fail anyway
-         consoleError(node.location, "symbol '" + node.name + "' is already defined.");
-         varSymbol = symbolTable.getSymbol(node.name);
-      }
-      else
-      {
-         varSymbol = symbolTable.addSymbol(node.name);
-      }
       if (node.value != null)
       {
          node.value.visit(this);
@@ -95,6 +77,7 @@ public class FunctionCompiler implements AstVisitor
       {
          builder.addOpLoadNull();
       }
+      Symbol varSymbol = symbolTable.getSymbol(node.name);
       switch (varSymbol.type)
       {
          case GLOBAL:
@@ -113,14 +96,9 @@ public class FunctionCompiler implements AstVisitor
    @Override
    public void accept(NodeFunctionExpr node)
    {
-      symbolTable.beginScope();
+      symbolTable.nextScope();
       FunctionPrototypeBuilder newBuilder = new FunctionPrototypeBuilder();
-      for (Identifier name : node.params)
-      {
-         symbolTable.addSymbol(name);
-         // TODO make this just set the size rather than call addParameter();
-         newBuilder.addParameter();
-      }
+      newBuilder.numParameters = node.params.size();
       if (node.isVariadic)
       {
          newBuilder.setIsVariadic();
@@ -130,7 +108,6 @@ public class FunctionCompiler implements AstVisitor
       {
          node.body.visit(newCompiler);
       }
-      symbolTable.endScope();
       FunctionPrototype newProto = newCompiler.getFunctionPrototype();
       int newProtoIndex = builder.addNestedFunction(newProto);
       builder.addOpBuildClosure(newProtoIndex);
@@ -139,24 +116,9 @@ public class FunctionCompiler implements AstVisitor
    @Override
    public void accept(NodeFunctionDef node)
    {
-      Symbol fnSymbol;
-      if (symbolTable.isSymbolDefined(node.name))
-      {
-         // TODO make it so this can never fail anyway.
-         consoleError(node.location, "symbol '" + node.name + "' is already defined.");
-         fnSymbol = symbolTable.getSymbol(node.name);
-      }
-      else
-      {
-         fnSymbol = symbolTable.addSymbol(node.name);
-      }
-      symbolTable.beginScope();
+      symbolTable.nextScope();
       FunctionPrototypeBuilder newBuilder = new FunctionPrototypeBuilder();
-      for (Identifier name : node.params)
-      {
-         symbolTable.addSymbol(name);
-         newBuilder.addParameter();
-      }
+      newBuilder.numParameters = node.params.size();
       if (node.isVariadic)
       {
          newBuilder.setIsVariadic();
@@ -166,10 +128,10 @@ public class FunctionCompiler implements AstVisitor
       {
          node.body.visit(newCompiler);
       }
-      symbolTable.endScope();
       FunctionPrototype newProto = newCompiler.getFunctionPrototype();
       int newProtoIndex = builder.addNestedFunction(newProto);
       builder.addOpBuildClosure(newProtoIndex);
+      Symbol fnSymbol = symbolTable.getSymbol(node.name);
       switch (fnSymbol.type)
       {
          case GLOBAL:
@@ -196,12 +158,8 @@ public class FunctionCompiler implements AstVisitor
    @Override
    public void accept(NodeIdentifier node)
    {
-      Identifier name = node.name;
-      if (!symbolTable.isSymbolDefined(name))
-      {
-         consoleWarning(node.location, "possible undefined variable '" + name + "'");
-      }
-      Symbol symbol = symbolTable.getSymbol(name);
+      Symbol symbol = symbolTable.getSymbol(node.name);
+      System.out.println(node.name + ", " + symbol);
       switch (symbol.type)
       {
          case GLOBAL:
@@ -249,6 +207,10 @@ public class FunctionCompiler implements AstVisitor
    @Override
    public void accept(NodeBlock node)
    {
-      node.body.forEach(n -> n.visit(this));
+      symbolTable.nextScope();
+      // TODO node.body.forEach(n -> n.visit(this)); ?
+      FunctionCompiler scopeCompiler = new FunctionCompiler(console, symbolTable,
+                                                            new FunctionPrototypeBuilder());
+      node.body.forEach(n -> n.visit(scopeCompiler));
    }
 }
