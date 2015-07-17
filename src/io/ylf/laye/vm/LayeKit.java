@@ -40,6 +40,7 @@ public class LayeKit extends LayeObject
    
    private LayeKit(Identifier name)
    {
+      assert(name != null);
       this.name = name;
    }
    
@@ -47,11 +48,13 @@ public class LayeKit extends LayeObject
    
    public LayeObject loadSlot(Identifier name)
    {
+      assert(name != null);
       return slots.get(name);
    }
    
    public LayeObject loadSlot(String name)
    {
+      assert(name != null);
       return loadSlot(Identifier.get(name));
    }
    
@@ -59,11 +62,14 @@ public class LayeKit extends LayeObject
    
    public void storeSlot(Identifier name, LayeObject value)
    {
-      slots.put(name, value);
+      assert(name != null);
+      // FIXME(sekai): use Laye's NULL constant!
+      slots.put(name, value != null ? value : null);
    }
    
    public void storeSlot(String name, LayeObject value)
    {
+      assert(name != null);
       storeSlot(Identifier.get(name), value);
    }
    

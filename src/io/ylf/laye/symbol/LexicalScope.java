@@ -23,6 +23,7 @@
  */
 package io.ylf.laye.symbol;
 
+import io.ylf.laye.struct.Identifier;
 import net.fudev.faxlib.collections.List;
 
 /**
@@ -48,6 +49,7 @@ public class LexicalScope
     */
    public void addChildScope(LexicalScope child)
    {
+      assert(child != null);
       children.append(child);
    }
    
@@ -57,5 +59,27 @@ public class LexicalScope
    public List<LexicalScope> getChildren()
    {
       return new List<LexicalScope>(children);
+   }
+   
+   public void addSymbol(Symbol.Type type, Identifier name, int index)
+   {
+      symbols.append(new Symbol(type, name, index));
+   }
+   
+   public Symbol getSymbol(Identifier name)
+   {
+      LexicalScope scope = this;
+      while (scope != null)
+      {
+         for (Symbol symbol : symbols)
+         {
+            if (symbol.name == name)
+            {
+               return symbol;
+            }
+         }
+         scope = scope.parent;
+      }
+      return null;
    }
 }

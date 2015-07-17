@@ -34,5 +34,6 @@ public class VirtualMachine
    
    private void executeInstruction(Instruction insn)
    {
+      assert(insn != null);
    }
 }

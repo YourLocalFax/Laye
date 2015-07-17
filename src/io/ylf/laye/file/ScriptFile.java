@@ -21,14 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package io.ylf.laye.lex;
+package io.ylf.laye.file;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author Sekai Kyoretsuna
  */
-public class LayeLexer
+public class ScriptFile
 {
-   public LayeLexer()
+   public static ScriptFile fromResource(String resourcePath)
    {
+      return new ScriptFile(resourcePath, true);
+   }
+
+   public static ScriptFile fromFile(String filePath)
+   {
+      return new ScriptFile(filePath, false);
+   }
+   
+   public final String path;
+   // TODO: enums? I don't like having a bool here.
+   private final boolean isResource;
+   
+   private ScriptFile(String path, boolean isResource)
+   {
+      this.path = path;
+      this.isResource = isResource;
+   }
+   
+   public InputStream read() throws IOException
+   {
+      if (isResource)
+      {
+         return ScriptFile.class.getResourceAsStream(path);
+      }
+      return new FileInputStream(new File(path));
    }
 }

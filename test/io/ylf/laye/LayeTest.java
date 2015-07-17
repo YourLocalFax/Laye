@@ -23,6 +23,9 @@
  */
 package io.ylf.laye;
 
+import io.ylf.laye.file.ScriptFile;
+import io.ylf.laye.lexical.FileLexer;
+
 /**
  * @author Sekai Kyoretsuna
  */
@@ -30,6 +33,11 @@ public final class LayeTest
 {
    public static void main(String[] args)
    {
+      // Create all of the objects that we'll need here.
+      ScriptFile scriptFile = ScriptFile.fromFile("./examples/hello_world.laye");
+      FileLexer lexer = new FileLexer();
+      
+      // Do all of the things!
    }
    
    private LayeTest()

@@ -21,37 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package io.ylf.laye.symbol;
-
-import io.ylf.laye.struct.Identifier;
+package io.ylf.laye.lexical;
 
 /**
  * @author Sekai Kyoretsuna
  */
-public class Symbol
+public class FileLexer
 {
-   public static enum Type
+   public FileLexer()
    {
-      GLOBAL, LOCAL, TYPE_INSTANCE, TYPE_STATIC, ENUM
-   }
-   
-   public final Type type;
-   
-   /**
-    * The defined name of this symbol.
-    */
-   public final Identifier name;
-   
-   /**
-    * The index of this symbol. This is not used for global symbols, it may be zero.
-    */
-   public final int index;
-   
-   public Symbol(Type type, Identifier name, int index)
-   {
-      assert(type != null && name != null && index >= 0);
-      this.type = type;
-      this.name = name;
-      this.index = index;
    }
 }

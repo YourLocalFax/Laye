@@ -21,37 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package io.ylf.laye.symbol;
+package io.ylf.laye.lexical;
 
-import io.ylf.laye.struct.Identifier;
+import io.ylf.laye.file.ScriptFile;
 
 /**
  * @author Sekai Kyoretsuna
  */
-public class Symbol
+public class Location
 {
-   public static enum Type
-   {
-      GLOBAL, LOCAL, TYPE_INSTANCE, TYPE_STATIC, ENUM
-   }
-   
-   public final Type type;
+   /**
+    * The file.
+    */
+   public final ScriptFile file;
    
    /**
-    * The defined name of this symbol.
+    * The line in the file, 1-based.
     */
-   public final Identifier name;
+   public final int line;
    
    /**
-    * The index of this symbol. This is not used for global symbols, it may be zero.
+    * The column in the file, 1-based.
     */
-   public final int index;
+   public final int column;
    
-   public Symbol(Type type, Identifier name, int index)
+   public Location(ScriptFile file, int line, int column)
    {
-      assert(type != null && name != null && index >= 0);
-      this.type = type;
-      this.name = name;
-      this.index = index;
+      assert(file != null && line >= 1 && column >= 1);
+      this.file = file;
+      this.line = line;
+      this.column = column;
    }
 }
