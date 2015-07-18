@@ -294,7 +294,6 @@ public class FileLexer
    {
       final Location location = getLocation();
       // TODO(sekai): this only handles decimal integers. Needs binary, octal, hex, fp, and sci-note.
-      // TODO(sekai): maybe also add unicode? 0uXXXX...?
       char lastChar;
       do
       {
