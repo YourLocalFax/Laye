@@ -5,6 +5,6 @@ fn MakeAdder(left)
 
 fn Main()
 {
-   var Add5 = MakeAdder(5)
-   Print(Add5(10))
+   var Add5 = MakeAdder(0b101)
+   Print(Add5(0xA))
 }

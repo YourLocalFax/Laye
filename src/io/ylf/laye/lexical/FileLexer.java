@@ -39,6 +39,29 @@ import io.ylf.laye.vm.LayeString;
  */
 public class FileLexer
 {
+   /**
+    * @author Sekai Kyoretsuna
+    */
+   private static interface CharacterMatcher
+   {
+      boolean apply(char c);
+   }
+   
+   private static boolean isHexadecimalCharacter(char c)
+   {
+      return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+   }
+   
+   private static boolean isBinaryCharacter(char c)
+   {
+      return c == '0' || c == '1';
+   }
+   
+   private static boolean isOctalCharacter(char c)
+   {
+      return c >= '0' && c <= '7';
+   }
+
    private final DetailLogger logger;
    
    private InputStream input = null;
@@ -290,30 +313,77 @@ public class FileLexer
       return new Token(Token.Type.OPERATOR, Operator.get(image), location);
    }
    
+   private char lexIntegerDigits(CharacterMatcher matcher)
+   {
+      char lastChar = currentChar;
+      while (matcher.apply(currentChar) || currentChar == '_')
+      {
+         lastChar = currentChar;
+         if (currentChar != '_')
+         {
+            putChar();
+         }
+         else
+         {
+            readChar();
+         }
+      }
+      return lastChar;
+   }
+   
    private Token lexNumericToken()
    {
       final Location location = getLocation();
-      // TODO(sekai): this only handles decimal integers. Needs binary, octal, hex, fp, and sci-note.
-      char lastChar;
-      do
+      // TODO(sekai): this only handles ints. Needs fp and sci-note.
+
+      char lastChar = currentChar;
+      int iRadix = 10;
+      
+      if (currentChar == '0')
       {
-         lastChar = currentChar;
-         putChar();
+         // read '0'
+         readChar();
+         switch (currentChar)
+         {
+            case 'x': case 'X': // hexadecimal
+            {
+               iRadix = 16;
+               readChar();
+               lastChar = lexIntegerDigits(FileLexer::isHexadecimalCharacter);
+            } break;
+            case 'b': case 'B': // binary
+            {
+               iRadix = 2;
+               readChar();
+               lastChar = lexIntegerDigits(FileLexer::isBinaryCharacter);
+            } break;
+            default: // octal
+            {
+               iRadix = 8;
+               lastChar = lexIntegerDigits(FileLexer::isOctalCharacter);
+            } break;
+         }
       }
-      while (Character.isDigit(currentChar) || currentChar == '_');
+      else
+      {
+         // TODO(sekai): Do lots of things for fp checks here
+         lastChar = lexIntegerDigits(Character::isDigit);
+      }
+      
       if (lastChar == '_')
       {
          logger.logError(location, "numbers cannot end with '_'.");
       }
+      
       String result = getTempString();
       try
       {
-         return new Token(Token.Type.INT_LITERAL, LayeInt.valueOf(Long.parseLong(result)), 
+         return new Token(Token.Type.INT_LITERAL, LayeInt.valueOf(Long.parseLong(result, iRadix)), 
                           location);
       }
-      catch (Exception e)
+      catch (NumberFormatException e)
       {
-         logger.logError(location, e.getMessage());
+         logger.logError(location, "Number format: " + e.getMessage());
          return new Token(Token.Type.INT_LITERAL, LayeInt.valueOf(0L), location);
       }
    }
