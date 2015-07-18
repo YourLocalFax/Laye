@@ -24,8 +24,6 @@
 
 package io.ylf.laye.lexical;
 
-import java.util.Objects;
-
 /**
  * @author Sekai Kyoretsuna
  */
@@ -36,7 +34,11 @@ public class Token
       KEYWORD,
       IDENTIFIER,
       OPERATOR,
-      ASSIGN,
+      INT_LITERAL,
+      FLOAT_LITERAL,
+      STRING_LITERAL,
+      
+      ASSIGN("="),
       WILDCARD("_"),
       OPEN_BRACE("("),
       CLOSE_BRACE(")"),
@@ -46,9 +48,7 @@ public class Token
       CLOSE_CURLY_BRACE("}"),
       SEMI_COLON(";"),
       COLON(":"),
-      COMMA(","),
-      INT_LITERAL,
-      STRING_LITERAL;
+      COMMA(",");
       
       public final String image;
       
@@ -66,9 +66,10 @@ public class Token
    public final Type type;
    
    /**
-    * Data stored for each token. In the case of keywords and identifiers, this is an instance
-    * of Identifier representing the image of the token. In the case of literals, this represents
-    * the literal object (string, integer, etc.) This should never be null.
+    * Data stored for each token. In the case of keywords, operators, and identifiers, this is 
+    * an instance of Keyword, Operator, or Identifier respectively representing the image of the
+    * token. In the case of literals, this represents the literal object as a LayeObject.
+    * This should never be null.
     */
    public final Object data;
    public final Location location;
@@ -76,11 +77,11 @@ public class Token
    public Token(Type type, Location location)
    {
       assert(type != null);
-      assert(type.image != null);
       assert(location != null);
       this.type = type;
       this.data = type.image;
       this.location = location;
+      assert(data != null);
    }
    
    public Token(Type type, Object data, Location location)
@@ -96,6 +97,62 @@ public class Token
    @Override
    public String toString()
    {
-      return Objects.toString(data);
+      return data.toString();
+   }
+
+   @Override
+   public int hashCode()
+   {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((data == null) ? 0 : data.hashCode());
+      result = prime * result + ((location == null) ? 0 : location.hashCode());
+      result = prime * result + ((type == null) ? 0 : type.hashCode());
+      return result;
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (this == obj)
+      {
+         return true;
+      }
+      if (obj == null)
+      {
+         return false;
+      }
+      if (!(obj instanceof Token))
+      {
+         return false;
+      }
+      Token other = (Token) obj;
+      if (data == null)
+      {
+         if (other.data != null)
+         {
+            return false;
+         }
+      }
+      else if (!data.equals(other.data))
+      {
+         return false;
+      }
+      if (location == null)
+      {
+         if (other.location != null)
+         {
+            return false;
+         }
+      }
+      else if (!location.equals(other.location))
+      {
+         return false;
+      }
+      if (type != other.type)
+      {
+         return false;
+      }
+      return true;
    }
 }

@@ -31,4 +31,6 @@ public abstract class LayeObject
    public LayeObject()
    {
    }
+   
+   public abstract String toString();
 }

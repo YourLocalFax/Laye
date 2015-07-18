@@ -33,18 +33,21 @@ import io.ylf.laye.lexical.Location;
 public class DetailLogger
 {
    private PrintStream out;
+   private PrintStream err;
    
    private int errorCount = 0;
    private int warningCount = 0;
    
    public DetailLogger()
    {
-      out = System.err;
+      out = System.out;
+      err = System.err;
    }
    
-   public DetailLogger(PrintStream out)
+   public DetailLogger(PrintStream out, PrintStream err)
    {
       this.out = out;
+      this.err = err;
    }
    
    public boolean hasErrors()
@@ -70,18 +73,58 @@ public class DetailLogger
    private String getHeader(Location location)
    {
       StringBuilder result = new StringBuilder();
-      
-      result.append(location.file.path);
-      if (location.line >= 0)
-      {
-         result.append(" line ").append(location.line);
-      }
-      if (location.column >= 0)
-      {
-         result.append(" column ").append(location.column);
-      }
-      
+      result.append(location.toString());
       return result.append(": ").toString();
+   }
+   
+   /**
+    * @param message
+    */
+   public void log(String message)
+   {
+      out.println(message);
+   }
+   
+   /**
+    * @param message
+    * @param args
+    */
+   public void logf(String format, Object... args)
+   {
+      out.printf(format, args);
+   }
+   
+   /**
+    * Logs a warning message, incrementing the warning count.
+    * @param location
+    * @param message
+    */
+   public void logWarning(Location location, String message)
+   {
+      warningCount++;
+      out.print("[Warning] ");
+      if (location != null)
+      {
+         out.print(getHeader(location));
+      }
+      out.println(message);
+   }
+   
+   /**
+    * Logs a warning message, formatted, incrementing the warning count.
+    * @param location
+    * @param message
+    * @param args
+    */
+   public void logWarningf(Location location, String format, Object... args)
+   {
+      warningCount++;
+      out.print("[Warning] ");
+      if (location != null)
+      {
+         out.print(getHeader(location));
+      }
+      out.printf(format, args);
    }
    
    /**
@@ -92,11 +135,12 @@ public class DetailLogger
    public void logError(Location location, String message)
    {
       errorCount++;
+      err.print("[Error] ");
       if (location != null)
       {
-         out.print(getHeader(location));
+         err.print(getHeader(location));
       }
-      out.println(message);
+      err.println(message);
    }
    
    /**
@@ -108,41 +152,11 @@ public class DetailLogger
    public void logErrorf(Location location, String format, Object... args)
    {
       errorCount++;
+      err.print("[Error] ");
       if (location != null)
       {
-         out.print(getHeader(location));
+         err.print(getHeader(location));
       }
-      out.printf(format, args);
-   }
-   
-   /**
-    * Logs a warning message, incrementing the error count.
-    * @param location
-    * @param message
-    */
-   public void logWarning(Location location, String message)
-   {
-      warningCount++;
-      if (location != null)
-      {
-         out.print(getHeader(location));
-      }
-      out.println(message);
-   }
-   
-   /**
-    * Logs a warning message, formatted, incrementing the error count.
-    * @param location
-    * @param message
-    * @param args
-    */
-   public void logWarningf(Location location, String format, Object... args)
-   {
-      warningCount++;
-      if (location != null)
-      {
-         out.print(getHeader(location));
-      }
-      out.printf(format, args);
+      err.printf(format, args);
    }
 }

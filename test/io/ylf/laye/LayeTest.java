@@ -58,10 +58,11 @@ public final class LayeTest
          return;
       }
       
-      logger.logErrorf(new Location(scriptFile, -1, -1), 
-            "Token generation failed with %d %s and %d %s.\n",
+      logger.logf("Code generation completed with %d %s and %d %s.\n",
             logger.getWarningCount(), logger.getWarningCount() == 1 ? "warning" : "warnings",
             logger.getErrorCount(), logger.getErrorCount() == 1 ? "error" : "errors");
+      
+      logger.log("");
       
       for (Token token : tokens)
       {

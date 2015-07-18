@@ -30,6 +30,8 @@ import io.ylf.laye.file.ScriptFile;
 import io.ylf.laye.log.DetailLogger;
 import io.ylf.laye.struct.Identifier;
 import io.ylf.laye.struct.Keyword;
+import io.ylf.laye.struct.Operator;
+import io.ylf.laye.vm.LayeInt;
 
 /**
  * @author Sekai Kyoretsuna
@@ -121,7 +123,7 @@ public class FileLexer
       }
       else
       {
-         // TODO check other characters that don't have a width
+         // TODO(sekai): check other characters that don't have a width
          switch (currentChar)
          {
             case '\r':
@@ -179,6 +181,10 @@ public class FileLexer
             case '"':
                return lexStringLiteral();
             default:
+               if (Operator.isOperatorChar(currentChar))
+               {
+                  return lexOperatorToken();
+               }
                if (Character.isDigit(currentChar))
                {
                   return lexNumericToken();
@@ -210,6 +216,7 @@ public class FileLexer
       // Read quote
       readChar();
       String result = getTempString();
+      // FIXME(sekai): create a LayeString object!
       return new Token(Token.Type.STRING_LITERAL, result, location);
    }
    
@@ -265,11 +272,27 @@ public class FileLexer
       }
    }
    
+   private Token lexOperatorToken()
+   {
+      final Location location = getLocation();
+      do
+      {
+         putChar();
+      }
+      while (Operator.isOperatorChar(currentChar));
+      String image = getTempString();
+      if (image.equals("="))
+      {
+         return new Token(Token.Type.ASSIGN, location);
+      }
+      return new Token(Token.Type.OPERATOR, Operator.get(image), location);
+   }
+   
    private Token lexNumericToken()
    {
       final Location location = getLocation();
-      // TODO this only handles decimal integers. Needs binary, octal, hex, fp, and sci-note.
-      // TODO maybe also add unicode? 0uXXXX...?
+      // TODO(sekai): this only handles decimal integers. Needs binary, octal, hex, fp, and sci-note.
+      // TODO(sekai): maybe also add unicode? 0uXXXX...?
       char lastChar;
       do
       {
@@ -282,7 +305,16 @@ public class FileLexer
          logger.logError(location, "numbers cannot end with '_'.");
       }
       String result = getTempString();
-      return new Token(Token.Type.INT_LITERAL, Long.parseLong(result), location);
+      try
+      {
+         return new Token(Token.Type.INT_LITERAL, LayeInt.valueOf(Long.parseLong(result)), 
+                          location);
+      }
+      catch (Exception e)
+      {
+         logger.logError(location, e.getMessage());
+         return new Token(Token.Type.INT_LITERAL, LayeInt.valueOf(0L), location);
+      }
    }
    
    private Token lexOtherTokens()

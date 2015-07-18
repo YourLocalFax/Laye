@@ -23,65 +23,44 @@
  */
 package io.ylf.laye.vm;
 
-import java.util.HashMap;
-
-import io.ylf.laye.struct.Identifier;
-
 /**
  * @author Sekai Kyoretsuna
  */
-public class LayeKit extends LayeObject
+public final class LayeInt extends LayeObject
 {
-   public final Identifier name;
+   private static final int CACHE_LOW = -128;
+   private static final int CACHE_HIGH = 127;
    
-   private final HashMap<Identifier, LayeObject> slots = new HashMap<>();
+   private static final LayeInt[] CACHE = new LayeInt[CACHE_HIGH - CACHE_LOW + 1];
    
-   private boolean initialized = false;
-   
-   private LayeKit(Identifier name)
+   static
    {
-      assert(name != null);
-      this.name = name;
-   }
-   
-   // ===== Load Slots
-   
-   public LayeObject loadSlot(Identifier name)
-   {
-      assert(name != null);
-      return slots.get(name);
-   }
-   
-   public LayeObject loadSlot(String name)
-   {
-      assert(name != null);
-      return loadSlot(Identifier.get(name));
-   }
-   
-   // ===== Store Slots
-   
-   public void storeSlot(Identifier name, LayeObject value)
-   {
-      assert(name != null);
-      // FIXME(sekai): use Laye's NULL constant!
-      slots.put(name, value != null ? value : null);
-   }
-   
-   public void storeSlot(String name, LayeObject value)
-   {
-      assert(name != null);
-      storeSlot(Identifier.get(name), value);
-   }
-   
-   // =====
-   
-   public void initialize(VirtualMachine vm)
-   {
-      if (initialized)
+      long value = CACHE_LOW;
+      for (int i = 0; i < CACHE.length; i++)
       {
-         return;
+         CACHE[i] = new LayeInt(value++);
       }
-      initialized = true;
-      // TODO initialize kits
+   }
+   
+   public static LayeInt valueOf(long value)
+   {
+      if (value >= CACHE_LOW && value <= CACHE_HIGH)
+      {
+         return CACHE[(int) value - CACHE_LOW];
+      }
+      return new LayeInt(value);
+   }
+   
+   public final long value;
+   
+   private LayeInt(long value)
+   {
+      this.value = value;
+   }
+   
+   @Override
+   public String toString()
+   {
+      return Long.toString(value);
    }
 }
