@@ -72,8 +72,14 @@ public class DetailLogger
       StringBuilder result = new StringBuilder();
       
       result.append(location.file.path);
-      result.append(" line ").append(location.line);
-      result.append(", column ").append(location.column);
+      if (location.line >= 0)
+      {
+         result.append(" line ").append(location.line);
+      }
+      if (location.column >= 0)
+      {
+         result.append(" column ").append(location.column);
+      }
       
       return result.append(": ").toString();
    }
@@ -86,7 +92,10 @@ public class DetailLogger
    public void logError(Location location, String message)
    {
       errorCount++;
-      out.print(getHeader(location));
+      if (location != null)
+      {
+         out.print(getHeader(location));
+      }
       out.println(message);
    }
    
@@ -99,7 +108,10 @@ public class DetailLogger
    public void logErrorf(Location location, String format, Object... args)
    {
       errorCount++;
-      out.print(getHeader(location));
+      if (location != null)
+      {
+         out.print(getHeader(location));
+      }
       out.printf(format, args);
    }
    
@@ -111,7 +123,10 @@ public class DetailLogger
    public void logWarning(Location location, String message)
    {
       warningCount++;
-      out.print(getHeader(location));
+      if (location != null)
+      {
+         out.print(getHeader(location));
+      }
       out.println(message);
    }
    
@@ -124,7 +139,10 @@ public class DetailLogger
    public void logWarningf(Location location, String format, Object... args)
    {
       warningCount++;
-      out.print(getHeader(location));
+      if (location != null)
+      {
+         out.print(getHeader(location));
+      }
       out.printf(format, args);
    }
 }

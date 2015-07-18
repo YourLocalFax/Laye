@@ -1,6 +1,7 @@
 extern Print
 
-fn MakeAdder(left) fn(right) right
+fn MakeAdder(left) 
+   fn(right) left + right
 
 fn Main()
 {

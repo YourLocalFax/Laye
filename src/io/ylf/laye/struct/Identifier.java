@@ -36,7 +36,7 @@ public final class Identifier
    {
       if (!isIdentifier(image))
       {
-         throw new IllegalArgumentException(image + " is not a valid Laye identifier.");
+         return null;
       }
       Identifier result = idents.get(image);
       if (result == null)

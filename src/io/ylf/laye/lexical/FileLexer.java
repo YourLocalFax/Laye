@@ -23,12 +23,290 @@
  */
 package io.ylf.laye.lexical;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import io.ylf.laye.file.ScriptFile;
+import io.ylf.laye.log.DetailLogger;
+import io.ylf.laye.struct.Identifier;
+import io.ylf.laye.struct.Keyword;
+
 /**
  * @author Sekai Kyoretsuna
  */
 public class FileLexer
 {
-   public FileLexer()
+   private final DetailLogger logger;
+   
+   private InputStream input = null;
+   private ScriptFile file = null;
+   
+   private StringBuilder builder = new StringBuilder();
+   private char currentChar = '\u0000';
+   
+   private int line = 1, column = 1;
+   private boolean eof;
+   
+   public FileLexer(DetailLogger logger)
    {
+      this.logger = logger;
+   }
+   
+   public TokenStream getTokens(ScriptFile file) throws IOException
+   {
+      this.file = file;
+      this.input = file.read();
+      
+      TokenStream result = new TokenStream(logger);
+      
+      readChar();
+      
+      Token token;
+      while ((token = lex()) != null)
+      {
+         result.append(token);
+      }
+      
+      input.close();
+      
+      return result;
+   }
+   
+   private Location getLocation()
+   {
+      return new Location(file, line, column);
+   }
+   
+   private String getTempString()
+   {
+      String result = builder.toString();
+      builder.setLength(0);
+      builder.trimToSize();
+      return result;
+   }
+   
+   private boolean putChar()
+   {
+      builder.append(currentChar);
+      return readChar();
+   }
+   
+   private void putChar(char c)
+   {
+      builder.append(c);
+   }
+   
+   private boolean readChar()
+   {
+      int next;
+      try
+      {
+         next = input.read();
+      }
+      catch (IOException e)
+      {
+         eof = true;
+         return false;
+      }
+      if (next == -1)
+      {
+         eof = true;
+         return false;
+      }
+      currentChar = (char) next;
+      if (currentChar == '\n')
+      {
+         line++;
+         column = 1;
+      }
+      else
+      {
+         // TODO check other characters that don't have a width
+         switch (currentChar)
+         {
+            case '\r':
+               break;
+            default:
+               column++;
+         }
+      }
+      return true;
+   }
+   
+   private Token lex()
+   {
+      while (!eof)
+      {
+         if (Character.isWhitespace(currentChar))
+         {
+            readChar();
+            continue;
+         }
+         final Location location = getLocation();
+         switch (currentChar)
+         {
+            case '(':
+               readChar();
+               return new Token(Token.Type.OPEN_BRACE, location);
+            case ')':
+               readChar();
+               return new Token(Token.Type.CLOSE_BRACE, location);
+            case '[':
+               readChar();
+               return new Token(Token.Type.OPEN_SQUARE_BRACE, location);
+            case ']':
+               readChar();
+               return new Token(Token.Type.CLOSE_SQUARE_BRACE, location);
+            case '{':
+               readChar();
+               return new Token(Token.Type.OPEN_CURLY_BRACE, location);
+            case '}':
+               readChar();
+               return new Token(Token.Type.CLOSE_CURLY_BRACE, location);
+            case ';':
+               readChar();
+               return new Token(Token.Type.SEMI_COLON, location);
+            case ':':
+               readChar();
+               return new Token(Token.Type.COLON, location);
+            case ',':
+               readChar();
+               return new Token(Token.Type.COMMA, location);
+            case '=':
+               readChar();
+               return new Token(Token.Type.ASSIGN, location);
+            case '\'':
+            case '"':
+               return lexStringLiteral();
+            default:
+               if (Character.isDigit(currentChar))
+               {
+                  return lexNumericToken();
+               }
+               return lexOtherTokens();
+         }
+      }
+      
+      return null;
+   }
+   
+   private Token lexStringLiteral()
+   {
+      final Location location = getLocation();
+      final char quoteChar = currentChar;
+      // Read quote
+      readChar();
+      while (currentChar != quoteChar)
+      {
+         if (currentChar == '\\')
+         {
+            putChar(lexEscapedCharacter());
+         }
+         else
+         {
+            putChar();
+         }
+      }
+      // Read quote
+      readChar();
+      String result = getTempString();
+      return new Token(Token.Type.STRING_LITERAL, result, location);
+   }
+   
+   private char lexEscapedCharacter()
+   {
+      final Location location = getLocation();
+      // Read '\'
+      readChar();
+      switch (currentChar)
+      {
+         case 'u':
+         {
+            readChar();
+            final StringBuilder sb = new StringBuilder();
+            int idx = 0;
+            for (; !eof && Character.isDigit(currentChar); idx++)
+            {
+               putChar();
+            }
+            if (idx > 4)
+            {
+               logger.logErrorf(location, 
+                     "at most 4 digits are expected when defining a unicode char, %d given.\n",
+                     idx);
+               return '\u0000';
+            }
+            return (char) Integer.parseInt(sb.toString());
+         }
+         case 'r':
+            readChar();
+            return '\r';
+         case 'n':
+            readChar();
+            return '\n';
+         case 't':
+            readChar();
+            return '\t';
+         case '0':
+            readChar();
+            return '\0';
+         case '"':
+            readChar();
+            return '\"';
+         case '\'':
+            readChar();
+            return '\'';
+         case '\\':
+            readChar();
+            return '\\';
+         default:
+            logger.logErrorf(location, "escape character '%c' not recognized.\n", currentChar);
+            return '\u0000';
+      }
+   }
+   
+   private Token lexNumericToken()
+   {
+      final Location location = getLocation();
+      // TODO this only handles decimal integers. Needs binary, octal, hex, fp, and sci-note.
+      // TODO maybe also add unicode? 0uXXXX...?
+      char lastChar;
+      do
+      {
+         lastChar = currentChar;
+         putChar();
+      }
+      while (Character.isDigit(currentChar) || currentChar == '_');
+      if (lastChar == '_')
+      {
+         logger.logError(location, "numbers cannot end with '_'.");
+      }
+      String result = getTempString();
+      return new Token(Token.Type.INT_LITERAL, Long.parseLong(result), location);
+   }
+   
+   private Token lexOtherTokens()
+   {
+      final Location location = getLocation();
+      if (!Identifier.isIdentifierStart(currentChar))
+      {
+         logger.logErrorf(location, "token '%c' is not a valid identifier start.\n", currentChar);
+         return null;
+      }
+      do
+      {
+         putChar();
+      }
+      while (Identifier.isIdentifierPart(currentChar));
+      String image = getTempString();
+      if (image.equals("_"))
+      {
+         return new Token(Token.Type.WILDCARD, location);
+      }
+      else if (Keyword.exists(image))
+      {
+         return new Token(Token.Type.KEYWORD, Keyword.get(image), location);
+      }
+      return new Token(Token.Type.IDENTIFIER, Identifier.get(image), location);
    }
 }

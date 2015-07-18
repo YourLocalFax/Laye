@@ -23,21 +23,50 @@
  */
 package io.ylf.laye;
 
+import java.io.IOException;
+
 import io.ylf.laye.file.ScriptFile;
 import io.ylf.laye.lexical.FileLexer;
+import io.ylf.laye.lexical.Location;
+import io.ylf.laye.lexical.Token;
+import io.ylf.laye.lexical.TokenStream;
+import io.ylf.laye.log.DetailLogger;
 
 /**
  * @author Sekai Kyoretsuna
  */
 public final class LayeTest
 {
-   public static void main(String[] args)
+   public static void main(String[] args) throws IOException
    {
+      DetailLogger logger = new DetailLogger();
+      
       // Create all of the objects that we'll need here.
       ScriptFile scriptFile = ScriptFile.fromFile("./examples/hello_world.laye");
-      FileLexer lexer = new FileLexer();
+      
+      FileLexer lexer = new FileLexer(logger);
       
       // Do all of the things!
+      TokenStream tokens = lexer.getTokens(scriptFile);
+      
+      if (logger.getErrorCount() > 0)
+      {
+         logger.logErrorf(new Location(scriptFile, -1, -1), 
+               "Token generation failed with %d %s and %d %s.\n",
+               logger.getWarningCount(), logger.getWarningCount() == 1 ? "warning" : "warnings",
+               logger.getErrorCount(), logger.getErrorCount() == 1 ? "error" : "errors");
+         return;
+      }
+      
+      logger.logErrorf(new Location(scriptFile, -1, -1), 
+            "Token generation failed with %d %s and %d %s.\n",
+            logger.getWarningCount(), logger.getWarningCount() == 1 ? "warning" : "warnings",
+            logger.getErrorCount(), logger.getErrorCount() == 1 ? "error" : "errors");
+      
+      for (Token token : tokens)
+      {
+         System.out.println(token);
+      }
    }
    
    private LayeTest()
