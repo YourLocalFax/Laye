@@ -32,6 +32,7 @@ import io.ylf.laye.struct.Identifier;
 import io.ylf.laye.struct.Keyword;
 import io.ylf.laye.struct.Operator;
 import io.ylf.laye.vm.LayeInt;
+import io.ylf.laye.vm.LayeString;
 
 /**
  * @author Sekai Kyoretsuna
@@ -216,8 +217,7 @@ public class FileLexer
       // Read quote
       readChar();
       String result = getTempString();
-      // FIXME(sekai): create a LayeString object!
-      return new Token(Token.Type.STRING_LITERAL, result, location);
+      return new Token(Token.Type.STRING_LITERAL, new LayeString(result), location);
    }
    
    private char lexEscapedCharacter()
@@ -232,18 +232,20 @@ public class FileLexer
             readChar();
             final StringBuilder sb = new StringBuilder();
             int idx = 0;
-            for (; !eof && Character.isDigit(currentChar); idx++)
+            for (; !eof && (Character.isDigit(currentChar) ||
+                           (currentChar >= 'a' && currentChar <= 'f') ||
+                           (currentChar >= 'A' && currentChar <= 'F')); idx++)
             {
                putChar();
             }
-            if (idx > 4)
+            if (idx != 4)
             {
                logger.logErrorf(location, 
-                     "at most 4 digits are expected when defining a unicode char, %d given.\n",
+                     "4 hexadecimal digits are expected when defining a unicode char, %d given.\n",
                      idx);
                return '\u0000';
             }
-            return (char) Integer.parseInt(sb.toString());
+            return (char) Integer.parseInt(sb.toString(), 16);
          }
          case 'r':
             readChar();
