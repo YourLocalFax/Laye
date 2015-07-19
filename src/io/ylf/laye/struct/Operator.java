@@ -102,18 +102,7 @@ public final class Operator
    
    public static boolean isOperatorChar(char c)
    {
-      switch (c)
-      {
-         case '~': case '!': case '@':
-         case '$': case '%': case '^':
-         case '&': case '*': case '-':
-         case '+': case '=': case '\\': 
-         case '|': case '<': case '>':
-         case '/': case '?':
-            return true;
-         default:
-            return false;
-      }
+      return "~!@$%^&*-+=\\|<>/?".indexOf(c) != -1;
    }
    
    public final String image;
