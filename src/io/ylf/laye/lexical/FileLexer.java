@@ -176,6 +176,9 @@ public class FileLexer
          final Location location = getLocation();
          switch (currentChar)
          {
+            case '#':
+               lexOutLineComment();
+               return lex();
             case '(':
                readChar();
                return new Token(Token.Type.OPEN_BRACE, location);
@@ -223,6 +226,16 @@ public class FileLexer
       }
       
       return null;
+   }
+   
+   private void lexOutLineComment()
+   {
+      // Nom all the chars until the end of a line.
+      do
+      {
+         readChar();
+      }
+      while (currentChar != '\n');
    }
    
    private Token lexStringLiteral()

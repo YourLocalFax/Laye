@@ -1,2 +1,7 @@
-extern Print
-extern Error
+fn Print()
+{
+}
+
+fn Error()
+{
+}
