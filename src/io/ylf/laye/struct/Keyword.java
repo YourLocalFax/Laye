@@ -44,6 +44,7 @@ public class Keyword
    public static final String STR_FALSE = "false";
    public static final String STR_NULL = "null";
 
+   public static final String STR_EXIT = "exit";
    public static final String STR_IF = "if";
    public static final String STR_EL = "el";
    public static final String STR_ITER = "iter";
@@ -85,6 +86,7 @@ public class Keyword
    public static final Keyword FALSE = new Keyword(STR_FALSE);
    public static final Keyword NULL = new Keyword(STR_NULL);
 
+   public static final Keyword EXIT = new Keyword(STR_EXIT);
    public static final Keyword IF = new Keyword(STR_IF);
    public static final Keyword EL = new Keyword(STR_EL);
    public static final Keyword ITER = new Keyword(STR_ITER);
