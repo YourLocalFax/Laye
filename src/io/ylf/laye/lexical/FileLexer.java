@@ -206,9 +206,6 @@ public class FileLexer
             case '.':
                readChar();
                return new Token(Token.Type.DOT, location);
-            case '=':
-               readChar();
-               return new Token(Token.Type.ASSIGN, location);
             case '\'':
             case '"':
                return lexStringLiteral();

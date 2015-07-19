@@ -1,7 +1,7 @@
 extern Print
 
 fn MakeAdder(left) 
-   fn(right) left + right
+   fn(right) left == right
 
 fn Main()
 {
