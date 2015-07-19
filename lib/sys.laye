@@ -1,7 +1,7 @@
-fn Print()
+fn Print(value)
 {
 }
 
-fn Error()
+fn Error(value)
 {
 }
