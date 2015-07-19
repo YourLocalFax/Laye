@@ -25,6 +25,7 @@ package io.ylf.laye.log;
 
 import java.io.PrintStream;
 
+import io.ylf.laye.LogMessageID;
 import io.ylf.laye.lexical.Location;
 
 /**
@@ -99,10 +100,10 @@ public class DetailLogger
     * @param location
     * @param message
     */
-   public void logWarning(Location location, String message)
+   public void logWarning(Location location, LogMessageID id, String message)
    {
       warningCount++;
-      out.print("[Warning] ");
+      out.printf("[Warning:%d] ", id.id);
       if (location != null)
       {
          out.print(getHeader(location));
@@ -116,10 +117,10 @@ public class DetailLogger
     * @param message
     * @param args
     */
-   public void logWarningf(Location location, String format, Object... args)
+   public void logWarningf(Location location, LogMessageID id, String format, Object... args)
    {
       warningCount++;
-      out.print("[Warning] ");
+      out.printf("[Warning:%d] ", id.id);
       if (location != null)
       {
          out.print(getHeader(location));
@@ -132,10 +133,10 @@ public class DetailLogger
     * @param location
     * @param message
     */
-   public void logError(Location location, String message)
+   public void logError(Location location, LogMessageID id, String message)
    {
       errorCount++;
-      err.print("[Error] ");
+      err.printf("[Error:%d] ", id.id);
       if (location != null)
       {
          err.print(getHeader(location));
@@ -149,10 +150,10 @@ public class DetailLogger
     * @param message
     * @param args
     */
-   public void logErrorf(Location location, String format, Object... args)
+   public void logErrorf(Location location, LogMessageID id, String format, Object... args)
    {
       errorCount++;
-      err.print("[Error] ");
+      err.printf("[Error:%d] ", id.id);
       if (location != null)
       {
          err.print(getHeader(location));

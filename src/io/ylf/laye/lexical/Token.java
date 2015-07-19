@@ -48,7 +48,8 @@ public class Token
       CLOSE_CURLY_BRACE("}"),
       SEMI_COLON(";"),
       COLON(":"),
-      COMMA(",");
+      COMMA(","),
+      DOT(".");
       
       public final String image;
       

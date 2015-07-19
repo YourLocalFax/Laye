@@ -21,52 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package io.ylf.laye.vm;
+package io.ylf.laye;
+
+import net.fudev.faxlib.collections.List;
 
 /**
  * @author Sekai Kyoretsuna
  */
-public final class LayeInt extends LayeObject
+public class ProcesserOptions
 {
-   private static final int CACHE_LOW = -128;
-   private static final int CACHE_HIGH = 127;
-   
-   private static final LayeInt[] CACHE = new LayeInt[CACHE_HIGH - CACHE_LOW + 1];
-   
-   static
-   {
-      long value = CACHE_LOW;
-      for (int i = 0; i < CACHE.length; i++)
-      {
-         CACHE[i] = new LayeInt(value++);
-      }
-   }
-   
-   public static LayeInt valueOf(long value)
-   {
-      if (value >= CACHE_LOW && value <= CACHE_HIGH)
-      {
-         return CACHE[(int) value - CACHE_LOW];
-      }
-      return new LayeInt(value);
-   }
-   
-   public final long value;
+   /**
+    * When this is <code>true</code>, compilation will fail when warnings are present.
+    */
+   public boolean warningsAsErrors = false;
    
    /**
-    * Creates a LayeInt value. It's preferred that you use {@link #valueOf(long)}, as it accesses
-    * a cache of integers in the range [-128, 127]. If you know the value is not in this range,
-    * using this constructor is preferred.
-    * @param value
+    * Any warning with an ID in this list is ignored.
     */
-   public LayeInt(long value)
-   {
-      this.value = value;
-   }
+   public List<Integer> ignoredWarnings = new List<Integer>();
    
-   @Override
-   public String toString()
+   public ProcesserOptions()
    {
-      return Long.toString(value);
    }
 }

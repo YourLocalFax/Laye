@@ -26,40 +26,16 @@ package io.ylf.laye.vm;
 /**
  * @author Sekai Kyoretsuna
  */
-public final class LayeInt extends LayeObject
+public final class LayeFloat extends LayeObject
 {
-   private static final int CACHE_LOW = -128;
-   private static final int CACHE_HIGH = 127;
-   
-   private static final LayeInt[] CACHE = new LayeInt[CACHE_HIGH - CACHE_LOW + 1];
-   
-   static
+   public static LayeFloat valueOf(double value)
    {
-      long value = CACHE_LOW;
-      for (int i = 0; i < CACHE.length; i++)
-      {
-         CACHE[i] = new LayeInt(value++);
-      }
+      return new LayeFloat(value);
    }
    
-   public static LayeInt valueOf(long value)
-   {
-      if (value >= CACHE_LOW && value <= CACHE_HIGH)
-      {
-         return CACHE[(int) value - CACHE_LOW];
-      }
-      return new LayeInt(value);
-   }
+   public final double value;
    
-   public final long value;
-   
-   /**
-    * Creates a LayeInt value. It's preferred that you use {@link #valueOf(long)}, as it accesses
-    * a cache of integers in the range [-128, 127]. If you know the value is not in this range,
-    * using this constructor is preferred.
-    * @param value
-    */
-   public LayeInt(long value)
+   public LayeFloat(double value)
    {
       this.value = value;
    }
@@ -67,6 +43,6 @@ public final class LayeInt extends LayeObject
    @Override
    public String toString()
    {
-      return Long.toString(value);
+      return Double.toString(value);
    }
 }

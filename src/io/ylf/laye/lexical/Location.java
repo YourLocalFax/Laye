@@ -47,10 +47,13 @@ public class Location
    
    public Location(ScriptFile file, int line, int column)
    {
-      assert(file != null && line >= 1 && column >= 1);
       this.file = file;
       this.line = line;
       this.column = column;
+      
+      assert(file != null);
+      assert(line >= 1);
+      assert(column >= 1);
    }
    
    @Override

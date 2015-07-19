@@ -51,18 +51,17 @@ public final class LayeTest
       
       if (logger.getErrorCount() > 0)
       {
-         logger.logErrorf(new Location(scriptFile, -1, -1), 
-               "Token generation failed with %d %s and %d %s.\n",
+         System.err.printf("Token generation failed with %d %s and %d %s.\n",
                logger.getWarningCount(), logger.getWarningCount() == 1 ? "warning" : "warnings",
                logger.getErrorCount(), logger.getErrorCount() == 1 ? "error" : "errors");
          return;
       }
       
-      logger.logf("Code generation completed with %d %s and %d %s.\n",
+      System.out.printf("Code generation completed with %d %s and %d %s.\n",
             logger.getWarningCount(), logger.getWarningCount() == 1 ? "warning" : "warnings",
             logger.getErrorCount(), logger.getErrorCount() == 1 ? "error" : "errors");
       
-      logger.log("");
+      System.out.println();
       
       for (Token token : tokens)
       {

@@ -26,11 +26,14 @@ package io.ylf.laye.lexical;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static io.ylf.laye.LogMessageID.*;
+
 import io.ylf.laye.file.ScriptFile;
 import io.ylf.laye.log.DetailLogger;
 import io.ylf.laye.struct.Identifier;
 import io.ylf.laye.struct.Keyword;
 import io.ylf.laye.struct.Operator;
+import io.ylf.laye.vm.LayeFloat;
 import io.ylf.laye.vm.LayeInt;
 import io.ylf.laye.vm.LayeString;
 
@@ -70,7 +73,7 @@ public class FileLexer
    private StringBuilder builder = new StringBuilder();
    private char currentChar = '\u0000';
    
-   private int line = 1, column = 1;
+   private int line = 1, column = 0;
    private boolean eof;
    
    public FileLexer(DetailLogger logger)
@@ -132,22 +135,24 @@ public class FileLexer
       catch (IOException e)
       {
          eof = true;
+         currentChar = '\u0000';
          return false;
       }
       if (next == -1)
       {
          eof = true;
+         currentChar = '\u0000';
          return false;
       }
       currentChar = (char) next;
       if (currentChar == '\n')
       {
          line++;
-         column = 1;
+         column = 0;
       }
       else
       {
-         // TODO(sekai): check other characters that don't have a width
+         // FIXME(sekai): check other characters that don't have a width
          switch (currentChar)
          {
             case '\r':
@@ -198,6 +203,9 @@ public class FileLexer
             case ',':
                readChar();
                return new Token(Token.Type.COMMA, location);
+            case '.':
+               readChar();
+               return new Token(Token.Type.DOT, location);
             case '=':
                readChar();
                return new Token(Token.Type.ASSIGN, location);
@@ -226,7 +234,7 @@ public class FileLexer
       final char quoteChar = currentChar;
       // Read quote
       readChar();
-      while (currentChar != quoteChar)
+      while (currentChar != quoteChar && !eof)
       {
          if (currentChar == '\\')
          {
@@ -237,8 +245,15 @@ public class FileLexer
             putChar();
          }
       }
-      // Read quote
-      readChar();
+      if (currentChar != quoteChar)
+      {
+         logger.logError(location, ERROR_UNFINISHED_STRING, "Unfinished string.");
+      }
+      else
+      {
+         // Read quote
+         readChar();
+      }
       String result = getTempString();
       return new Token(Token.Type.STRING_LITERAL, new LayeString(result), location);
    }
@@ -255,17 +270,19 @@ public class FileLexer
             readChar();
             final StringBuilder sb = new StringBuilder();
             int idx = 0;
-            for (; !eof && (Character.isDigit(currentChar) ||
+            for (; !eof && idx < 4 && (Character.isDigit(currentChar) ||
                            (currentChar >= 'a' && currentChar <= 'f') ||
                            (currentChar >= 'A' && currentChar <= 'F')); idx++)
             {
-               putChar();
+               sb.append(currentChar);
+               readChar();
             }
             if (idx != 4)
             {
-               logger.logErrorf(location, 
-                     "4 hexadecimal digits are expected when defining a unicode char, %d given.\n",
-                     idx);
+               logger.logErrorf(location, ERROR_ESCAPED_UNICODE_SIZE,
+                                "4 hexadecimal digits are expected when "
+                                + "defining a unicode char, %d given.\n",
+                                idx);
                return '\u0000';
             }
             return (char) Integer.parseInt(sb.toString(), 16);
@@ -292,7 +309,8 @@ public class FileLexer
             readChar();
             return '\\';
          default:
-            logger.logErrorf(location, "escape character '%c' not recognized.\n", currentChar);
+            logger.logErrorf(location, ERROR_ILLEGAL_ESCAPE,
+                             "escape character '%c' not recognized.\n", currentChar);
             return '\u0000';
       }
    }
@@ -316,7 +334,7 @@ public class FileLexer
    private char lexIntegerDigits(CharacterMatcher matcher)
    {
       char lastChar = currentChar;
-      while (matcher.apply(currentChar) || currentChar == '_')
+      while ((matcher.apply(currentChar) || currentChar == '_') && !eof)
       {
          lastChar = currentChar;
          if (currentChar != '_')
@@ -337,7 +355,11 @@ public class FileLexer
       // TODO(sekai): this only handles ints. Needs fp and sci-note.
 
       char lastChar = currentChar;
+      
+      boolean isInteger = true;
       int iRadix = 10;
+      
+      // FIXME(sekai): Needs more '_' error checking.
       
       if (currentChar == '0')
       {
@@ -366,25 +388,106 @@ public class FileLexer
       }
       else
       {
-         // TODO(sekai): Do lots of things for fp checks here
-         lastChar = lexIntegerDigits(Character::isDigit);
+         while ((Character.isDigit(currentChar) || currentChar == '_' ||
+                currentChar == '.' || currentChar == 'e' || currentChar == 'E') && !eof)
+         {
+            lastChar = currentChar;
+            // TODO(sekai): This looks like it can be put into a switch/case.
+            if (currentChar == '.')
+            {
+               isInteger = false; // now it's floating point
+            }
+            else if (currentChar == 'e' || currentChar == 'E')
+            {
+               putChar();
+               if (currentChar == '-')
+               {
+                  putChar();
+               }
+               continue;
+            }
+            else if (currentChar == '_')
+            {
+               readChar();
+               continue;
+            }
+            putChar();
+         }
       }
       
       if (lastChar == '_')
       {
-         logger.logError(location, "numbers cannot end with '_'.");
+         logger.logError(location, ERROR_UNDERSCORE_IN_NUMBER, "Numbers cannot end with '_'.");
       }
       
+      if (currentChar == 'f' || currentChar == 'F')
+      {
+         if (!isInteger)
+         {
+            logger.logWarningf(location, WARNING_FLOAT_DECOR,
+                  "'%c' was used on an already floating-point value, "
+                  + "this is unnecessary.", currentChar);
+         }
+         readChar();
+         isInteger = false;
+      }
+
       String result = getTempString();
+      
+      // FIXME(sekai): Here, identifiers are now valid. (1.0fIDENT will lex), fix plz.
+      
+      boolean hadTrailingCharacters = false;
+      while (!eof && Character.isLetterOrDigit(currentChar))
+      {
+         hadTrailingCharacters = true;
+         putChar();
+      }
+      
+      if (hadTrailingCharacters)
+      {
+         logger.logErrorf(location, ERROR_TRAILING_CHARS_IN_NUMBER,
+               "Unexpected characters \"%s\" at the end of a number.\n",
+               getTempString());
+      }
+      
+      if (lastChar == '.' || currentChar == '.')
+      {
+         logger.logErrorf(location, ERROR_DOT_AFTER_NUMBER,
+               "Illegal '.' at end of a number.\n",
+               getTempString());
+         if (currentChar == '.')
+         {
+            readChar();
+         }
+      }
+      
       try
       {
-         return new Token(Token.Type.INT_LITERAL, LayeInt.valueOf(Long.parseLong(result, iRadix)), 
-                          location);
+         if (isInteger)
+         {
+            return new Token(Token.Type.INT_LITERAL, 
+                             LayeInt.valueOf(Long.parseLong(result, iRadix)), 
+                             location);
+         }
+         else
+         {
+            return new Token(Token.Type.FLOAT_LITERAL,
+                             new LayeFloat(Double.parseDouble(result)), 
+                             location);
+         }
       }
       catch (NumberFormatException e)
       {
-         logger.logError(location, "Number format: " + e.getMessage());
-         return new Token(Token.Type.INT_LITERAL, LayeInt.valueOf(0L), location);
+         logger.logError(location, ERROR_NUMBER_FORMAT,
+                         "Number format: " + e.getMessage());
+         if (isInteger)
+         {
+            return new Token(Token.Type.INT_LITERAL, LayeInt.valueOf(0L), location);
+         }
+         else
+         {
+            return new Token(Token.Type.FLOAT_LITERAL, new LayeFloat(0D), location);
+         }
       }
    }
    
@@ -393,14 +496,15 @@ public class FileLexer
       final Location location = getLocation();
       if (!Identifier.isIdentifierStart(currentChar))
       {
-         logger.logErrorf(location, "token '%c' is not a valid identifier start.\n", currentChar);
+         logger.logErrorf(location, ERROR_INVALID_IDENTIFIER_START,
+               "token '%c' is not a valid identifier start.\n", currentChar);
          return null;
       }
       do
       {
          putChar();
       }
-      while (Identifier.isIdentifierPart(currentChar));
+      while (!eof && Identifier.isIdentifierPart(currentChar));
       String image = getTempString();
       if (image.equals("_"))
       {
