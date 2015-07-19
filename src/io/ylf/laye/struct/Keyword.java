@@ -46,13 +46,12 @@ public class Keyword
 
    public static final String STR_IF = "if";
    public static final String STR_EL = "el";
-   public static final String STR_FOR = "for";
-   public static final String STR_EACH = "each";
-   public static final String STR_IN = "in";
+   public static final String STR_ITER = "iter";
    public static final String STR_TO = "to";
    public static final String STR_BY = "by";
+   public static final String STR_EACH = "each";
+   public static final String STR_IN = "in";
    public static final String STR_WHILE = "while";
-   public static final String STR_WITH = "with";
    public static final String STR_TAKE = "take";
    public static final String STR_MATCH = "match";
 
@@ -88,13 +87,12 @@ public class Keyword
 
    public static final Keyword IF = new Keyword(STR_IF);
    public static final Keyword EL = new Keyword(STR_EL);
-   public static final Keyword FOR = new Keyword(STR_FOR);
-   public static final Keyword EACH = new Keyword(STR_EACH);
-   public static final Keyword IN = new Keyword(STR_IN);
+   public static final Keyword ITER = new Keyword(STR_ITER);
    public static final Keyword TO = new Keyword(STR_TO);
    public static final Keyword BY = new Keyword(STR_BY);
+   public static final Keyword EACH = new Keyword(STR_EACH);
+   public static final Keyword IN = new Keyword(STR_IN);
    public static final Keyword WHILE = new Keyword(STR_WHILE);
-   public static final Keyword WITH = new Keyword(STR_WITH);
    public static final Keyword TAKE = new Keyword(STR_TAKE);
    public static final Keyword MATCH = new Keyword(STR_MATCH);
 
